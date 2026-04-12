@@ -5,12 +5,17 @@ FROM node:20-slim AS frontend-builder
 
 WORKDIR /frontend
 
-# 复制前端代码
+# 首先复制 package.json 和 package-lock.json（如果存在）
+COPY frontend/package*.json ./
+
+# 安装依赖
+RUN npm install --prefer-offline --no-audit --no-fund
+
+# 复制其余前端代码
 COPY frontend .
 
-# 安装依赖并构建
-RUN npm ci --prefer-offline --no-audit --no-fund \
-    && npm run build
+# 构建静态文件
+RUN npm run build
 
 ###############################################
 # Base Image - Python
@@ -140,7 +145,7 @@ COPY ./docker/healthcheck.sh $MEALIE_HOME/healthcheck.sh
 RUN chmod +x $MEALIE_HOME/healthcheck.sh
 HEALTHCHECK CMD $MEALIE_HOME/healthcheck.sh
 
-ENV HOST 0.0.0.0
+ENV HOST=0.0.0.0
 
 EXPOSE ${APP_PORT}
 COPY ./docker/entry.sh $MEALIE_HOME/run.sh

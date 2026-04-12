@@ -13,6 +13,9 @@ import {
 // 使用相对路径，让Next.js rewrite代理到后端
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || ''
 
+// 开发环境下后端地址
+const BACKEND_URL = 'http://localhost:9000'
+
 class ApiClient {
   private client: AxiosInstance
   private token: string | null = null
@@ -283,6 +286,17 @@ class ApiClient {
   getUserAvatarUrl(userId: string, cacheKey?: string): string {
     const cacheParam = cacheKey ? `?cache_key=${cacheKey}` : ''
     return `${API_BASE_URL}/api/users/${userId}/image.webp${cacheParam}`
+  }
+
+  // 获取食谱图片完整 URL（用于直接显示）
+  getRecipeImageUrl(recipeId: string, imageName?: string): string {
+    // 开发环境使用完整后端地址，生产环境使用相对路径
+    const baseUrl = process.env.NODE_ENV === 'development' ? BACKEND_URL : ''
+    if (imageName) {
+      return `${baseUrl}/api/recipes/${recipeId}/images/${imageName}`
+    }
+    // 默认返回缩略图
+    return `${baseUrl}/api/recipes/${recipeId}/image`
   }
 }
 

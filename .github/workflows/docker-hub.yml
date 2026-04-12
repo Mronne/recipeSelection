@@ -7,8 +7,8 @@ on:
 
 env:
   # Docker Hub 镜像名
-  BACKEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/wangzhe-restaurant
-  FRONTEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/wangzhe-restaurant-frontend
+  BACKEND_IMAGE: mronne/wangzhe-restaurant
+  FRONTEND_IMAGE: mronne/wangzhe-restaurant-frontend
 
 jobs:
   build-and-push-backend:
@@ -137,7 +137,7 @@ jobs:
         services:
           mealie:
             container_name: wangzhe-restaurant-api
-            image: ${{ secrets.DOCKERHUB_USERNAME }}/wangzhe-restaurant:latest
+            image: mronne/wangzhe-restaurant:latest
             restart: always
             ports:
               - "9000:9000"
@@ -155,7 +155,7 @@ jobs:
         
           frontend:
             container_name: wangzhe-restaurant-web
-            image: ${{ secrets.DOCKERHUB_USERNAME }}/wangzhe-restaurant-frontend:latest
+            image: mronne/wangzhe-restaurant-frontend:latest
             restart: always
             ports:
               - "3000:3000"
@@ -176,8 +176,8 @@ jobs:
         ================================================
         
         镜像地址:
-          - 后端: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/wangzhe-restaurant:latest
-          - 前端: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/wangzhe-restaurant-frontend:latest
+          - 后端: docker.io/mronne/wangzhe-restaurant:latest
+          - 前端: docker.io/mronne/wangzhe-restaurant-frontend:latest
         
         部署步骤:
           1. 将 docker-compose.yml 上传到极空间

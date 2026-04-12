@@ -70,11 +70,22 @@ export default function LoginPage() {
           localStorage.setItem('user_role', 'user')
           redirectToHome()
         } else {
-          const err = await res.json()
-          setError(typeof err.detail === 'string' ? err.detail : '注册失败')
+          // 处理非 JSON 响应
+          const contentType = res.headers.get('content-type')
+          if (contentType && contentType.includes('application/json')) {
+            const err = await res.json()
+            setError(typeof err.detail === 'string' ? err.detail : JSON.stringify(err))
+          } else {
+            const text = await res.text()
+            setError(`服务器错误 (${res.status}): ${text.substring(0, 100)}`)
+          }
         }
       } catch (err: any) {
-        setError(err?.message || '网络错误')
+        if (err?.message?.includes('Unexpected token')) {
+          setError('后端服务未启动或 API 路径错误，请检查后端是否运行')
+        } else {
+          setError(err?.message || '网络错误，请检查网络连接')
+        }
       } finally {
         setIsLoading(false)
       }
@@ -120,8 +131,15 @@ export default function LoginPage() {
             localStorage.setItem('user_role', 'admin')
             redirectToHome()
           } else {
-            const err = await res.json()
-            setError(typeof err.detail === 'string' ? err.detail : '登录失败')
+            // 处理非 JSON 响应
+            const contentType = res.headers.get('content-type')
+            if (contentType && contentType.includes('application/json')) {
+              const err = await res.json()
+              setError(typeof err.detail === 'string' ? err.detail : JSON.stringify(err))
+            } else {
+              const text = await res.text()
+              setError(`服务器错误 (${res.status}): ${text.substring(0, 100)}`)
+            }
           }
         }
       } catch (err: any) {

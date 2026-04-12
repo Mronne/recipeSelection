@@ -148,12 +148,16 @@ export default function AvatarCropper({ image, onCancel, onConfirm }: AvatarCrop
       // Draw from preview canvas
       outputCtx.drawImage(canvasRef.current, 0, 0, 256, 256)
 
-      // Convert to blob
-      outputCanvas.toBlob((blob) => {
-        if (blob) {
-          onConfirm(blob)
-        }
-      }, 'image/jpeg', 0.9)
+      // Convert to blob (使用 Promise 包装以等待完成)
+      const blob = await new Promise<Blob | null>((resolve) => {
+        outputCanvas.toBlob((b) => resolve(b), 'image/jpeg', 0.9)
+      })
+      
+      if (blob) {
+        await onConfirm(blob)
+      } else {
+        throw new Error('Failed to create blob')
+      }
     } catch (err) {
       console.error('Crop failed:', err)
       alert('图片处理失败，请重试')

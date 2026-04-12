@@ -73,11 +73,16 @@ export default function CreateRecipe() {
     setRecipe(prev => ({ ...prev, ...updates }))
   }
 
+  const [error, setError] = useState<string>('')
+
   const handleSubmit = async () => {
+    setError('')
     const result = await create(recipe)
     if (result.success) {
       setShowSuccess(true)
       setTimeout(() => router.push('/'), 1500)
+    } else {
+      setError(result.error || '创建失败，请重试')
     }
   }
 
@@ -263,6 +268,13 @@ export default function CreateRecipe() {
                     </>
                   )}
                 </button>
+              )}
+              
+              {/* Error Message */}
+              {error && (
+                <div className="mt-4 p-3 bg-[#FFEBEE] border border-[#FFCDD2] rounded-lg text-[#C62828] text-sm">
+                  {error}
+                </div>
               )}
             </div>
           </div>

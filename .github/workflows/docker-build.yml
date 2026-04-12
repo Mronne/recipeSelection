@@ -10,6 +10,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
@@ -26,7 +27,7 @@ jobs:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
       with:
-        platforms: linux/amd64,linux/arm64
+        platforms: linux/arm64
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -58,12 +59,12 @@ jobs:
         context: .
         file: ./docker/Dockerfile
         target: production
-        platforms: linux/amd64,linux/arm64
+        platforms: linux/arm64
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        # 禁用缓存以确保使用最新的 Dockerfile
+        no-cache: true
 
     - name: Output image digest
       run: echo "Image digest - ${{ steps.build-and-push.outputs.digest }}"

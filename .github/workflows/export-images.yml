@@ -1,0 +1,159 @@
+name: Export Docker Images for Download
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:  # 允许手动触发
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE: ghcr.io/mronne/recipeselection:main
+  FRONTEND_IMAGE: ghcr.io/mronne/recipeselection-frontend:main
+
+jobs:
+  export-backend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read  # 需要读取私有镜像
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Pull and save backend image
+      run: |
+        # 拉取镜像
+        docker pull ${{ env.BACKEND_IMAGE }}
+        
+        # 保存为 tar 文件
+        docker save ${{ env.BACKEND_IMAGE }} > mealie-backend.tar
+        
+        # 压缩以减小体积
+        gzip -c mealie-backend.tar > mealie-backend.tar.gz
+        
+        # 显示文件大小
+        ls -lh mealie-backend.tar*
+
+    - name: Upload backend image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: mealie-backend-image
+        path: mealie-backend.tar.gz
+        retention-days: 30  # 保留 30 天
+
+  export-frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Pull and save frontend image
+      run: |
+        # 拉取镜像
+        docker pull ${{ env.FRONTEND_IMAGE }}
+        
+        # 保存为 tar 文件
+        docker save ${{ env.FRONTEND_IMAGE }} > mealie-frontend.tar
+        
+        # 压缩以减小体积
+        gzip -c mealie-frontend.tar > mealie-frontend.tar.gz
+        
+        # 显示文件大小
+        ls -lh mealie-frontend.tar*
+
+    - name: Upload frontend image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: mealie-frontend-image
+        path: mealie-frontend.tar.gz
+        retention-days: 30
+
+  create-release-package:
+    needs: [export-backend, export-frontend]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ./artifacts
+
+    - name: Create deployment package
+      run: |
+        # 创建部署目录
+        mkdir -p deployment/mealie-images
+        
+        # 复制镜像文件
+        cp ./artifacts/mealie-backend-image/mealie-backend.tar.gz deployment/mealie-images/
+        cp ./artifacts/mealie-frontend-image/mealie-frontend.tar.gz deployment/mealie-images/
+        
+        # 复制配置文件
+        cp docker-compose.zspace.yml deployment/
+        cp DEPLOY_ZSPACE_Z2PRO.md deployment/
+        cp IMPORT_IMAGES_MANUAL.md deployment/
+        
+        # 创建导入脚本
+        cat > deployment/load-images.sh << 'EOF'
+        #!/bin/bash
+        echo "=== 导入 Mealie 镜像到极空间 ==="
+        echo ""
+        
+        # 解压并导入后端镜像
+        echo "导入后端镜像..."
+        gunzip -c mealie-images/mealie-backend.tar.gz | docker load
+        
+        # 解压并导入前端镜像
+        echo "导入前端镜像..."
+        gunzip -c mealie-images/mealie-frontend.tar.gz | docker load
+        
+        echo ""
+        echo "=== 导入完成 ==="
+        echo "查看镜像: docker images | grep recipeselection"
+        EOF
+        
+        chmod +x deployment/load-images.sh
+        
+        # 打包
+        cd deployment
+        zip -r ../mealie-deployment-package.zip .
+        cd ..
+        
+        ls -lh mealie-deployment-package.zip
+
+    - name: Upload deployment package
+      uses: actions/upload-artifact@v4
+      with:
+        name: mealie-deployment-package
+        path: mealie-deployment-package.zip
+        retention-days: 30

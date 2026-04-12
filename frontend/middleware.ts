@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 // 不需要登录就能访问的路径
-const PUBLIC_PATHS = ['/login', '/register', '/api', '/_next', '/images', '/favicon.ico']
+const PUBLIC_PATHS = ['/login', '/register', '/api', '/_next', '/images', '/favicon.ico', '/logo.png']
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -31,6 +31,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|images|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|images|favicon.ico|logo.png).*)',
   ],
 }

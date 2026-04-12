@@ -179,8 +179,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col">
       {/* Header */}
-      <header className="px-4 sm:px-8 py-6">
-        <Logo size="lg" />
+      <header className="px-4 sm:px-8 py-6 flex justify-center">
+        <Logo width={240} height={72} />
       </header>
 
       {/* Main Content */}

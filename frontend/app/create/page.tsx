@@ -323,6 +323,7 @@ function Step1BasicInfo({
         <ImageUploader 
           value={recipe.coverImage}
           onChange={(url, file) => {
+            console.log('Step1BasicInfo: onChange', url, file)
             updateRecipe({ coverImage: url })
             onImageSelect(file || null)
           }}

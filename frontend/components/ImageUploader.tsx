@@ -18,9 +18,11 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
+    console.log('ImageUploader: file selected', file?.name, file?.size)
     if (file) {
       // 创建本地预览URL
       const url = URL.createObjectURL(file)
+      console.log('ImageUploader: created URL', url)
       setPreview(url)
       onChange?.(url, file)
     }

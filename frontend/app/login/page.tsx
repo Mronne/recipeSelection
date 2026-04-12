@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2, Eye, EyeOff, Crown, User, Shield, UserPlus, ChevronDown } from 'lucide-react'
-import { setCurrentUser, createAdminUser, createRegularUser, createGuestUser } from '@/lib/auth'
+import { setCurrentUser, setToken, createAdminUser, createRegularUser, createGuestUser } from '@/lib/auth'
+import Logo from '@/components/Logo'
 
 type UserRole = 'admin' | 'user' | 'guest'
 type AuthMode = 'login' | 'register'
@@ -65,7 +66,7 @@ export default function LoginPage() {
           const user = createRegularUser(data.username || formData.username, data.email)
           setCurrentUser(user)
           if (data.access_token) {
-            localStorage.setItem('mealie_token', data.access_token)
+            setToken(data.access_token)
           }
           localStorage.setItem('user_role', 'user')
           redirectToHome()
@@ -104,7 +105,7 @@ export default function LoginPage() {
 
         if (res.ok) {
           const data = await res.json()
-          localStorage.setItem('mealie_token', data.access_token)
+          setToken(data.access_token)
           
           // 根据选择的角色创建用户
           let user
@@ -127,7 +128,7 @@ export default function LoginPage() {
             const user = createAdminUser()
             user.username = DEFAULT_ADMIN.username
             setCurrentUser(user)
-            localStorage.setItem('mealie_token', 'default-admin-token')
+            setToken('default-admin-token')
             localStorage.setItem('user_role', 'admin')
             redirectToHome()
           } else {
@@ -150,7 +151,7 @@ export default function LoginPage() {
           const user = createAdminUser()
           user.username = DEFAULT_ADMIN.username
           setCurrentUser(user)
-          localStorage.setItem('mealie_token', 'default-admin-token')
+          setToken('default-admin-token')
           localStorage.setItem('user_role', 'admin')
           redirectToHome()
         } else {
@@ -166,7 +167,7 @@ export default function LoginPage() {
   const guestMode = () => {
     const guest = createGuestUser()
     setCurrentUser(guest)
-    localStorage.setItem('mealie_token', 'guest-token')
+    setToken('guest-token')
     localStorage.setItem('guest_mode', 'true')
     localStorage.setItem('user_role', 'guest')
     redirectToHome()
@@ -179,11 +180,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col">
       {/* Header */}
       <header className="px-4 sm:px-8 py-6">
-        <div className="flex items-center justify-center gap-3">
-          <Crown className="w-8 h-8 text-[#FFD700]" />
-          <span className="text-3xl font-bold text-[#212529]">王者餐厅</span>
-          <Crown className="w-8 h-8 text-[#FFD700]" />
-        </div>
+        <Logo size="lg" />
       </header>
 
       {/* Main Content */}

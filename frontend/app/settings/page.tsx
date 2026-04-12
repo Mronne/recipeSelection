@@ -10,6 +10,7 @@ import {
 import Sidebar from '@/components/Sidebar'
 import AvatarCropper from '@/components/AvatarCropper'
 import { api } from '@/lib/api'
+import { clearToken } from '@/lib/auth'
 import { 
   getAllCategories, 
   getAllTags, 
@@ -69,7 +70,7 @@ export default function SettingsPage() {
 
   const handleLogout = () => {
     if (confirm('确定要退出登录吗？')) {
-      localStorage.removeItem('mealie_token')
+      clearToken()
       localStorage.removeItem('guest_mode')
       localStorage.removeItem('current_user')
       window.location.href = '/login'

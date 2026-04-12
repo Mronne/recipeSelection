@@ -65,6 +65,8 @@ class ApiClient {
     this.token = null
     if (typeof window !== 'undefined') {
       localStorage.removeItem('mealie_token')
+      // 同时清除 cookie
+      document.cookie = 'mealie_token=; path=/; max-age=0'
     }
   }
 

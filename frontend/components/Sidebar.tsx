@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { clearToken } from '@/lib/auth'
 import { cn } from '@/lib/utils'
 import { isAdmin } from '@/lib/auth'
 
@@ -171,7 +172,7 @@ export default function Sidebar() {
         
         <button 
           onClick={() => {
-            localStorage.removeItem('mealie_token')
+            clearToken()
             localStorage.removeItem('demo_mode')
             localStorage.removeItem('guest_mode')
             localStorage.removeItem('current_user')

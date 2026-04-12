@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { api } from '@/lib/api'
 import { demoApi, isDemoMode } from '@/lib/api-demo'
+import { clearToken } from '@/lib/auth'
 import type { User, LoginCredentials } from '@/types'
 
 export function useAuth() {
@@ -56,9 +57,8 @@ export function useAuth() {
   }, [])
 
   const logout = useCallback(async () => {
-    localStorage.removeItem('mealie_token')
+    clearToken()
     localStorage.removeItem('demo_mode')
-    api.clearToken()
     setUser(null)
     setIsAuthenticated(false)
   }, [])

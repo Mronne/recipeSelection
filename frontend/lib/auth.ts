@@ -59,6 +59,21 @@ export function setCurrentUser(user: AuthUser | null): void {
   }
 }
 
+// 设置 token（同时设置 localStorage 和 cookie）
+export function setToken(token: string): void {
+  if (typeof window === 'undefined') return
+  localStorage.setItem('mealie_token', token)
+  // 设置 cookie 供 middleware 使用
+  document.cookie = `mealie_token=${token}; path=/; max-age=2592000` // 30天
+}
+
+// 清除 token
+export function clearToken(): void {
+  if (typeof window === 'undefined') return
+  localStorage.removeItem('mealie_token')
+  document.cookie = 'mealie_token=; path=/; max-age=0'
+}
+
 // 检查是否为管理员
 export function isAdmin(): boolean {
   const user = getCurrentUser()

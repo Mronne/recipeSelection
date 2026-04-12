@@ -9,9 +9,8 @@ WORKDIR /frontend
 COPY frontend/package*.json ./
 
 # 安装依赖（带调试输出）
-RUN npm install --prefer-offline --no-audit --no-fund 2>&1 && \
-    echo "=== npm install completed ===" && \
-    ls -la node_modules | head -10
+RUN npm install --prefer-offline --no-audit --no-fund 2>&1 | tee /tmp/npm-install.log || \
+    (cat /tmp/npm-install.log && exit 1)
 
 # 复制其余前端代码
 COPY frontend .
@@ -20,10 +19,17 @@ COPY frontend .
 RUN echo "=== Files in /frontend ===" && \
     ls -la && \
     echo "=== Files in app directory ===" && \
-    ls -la app/
+    ls -la app/ && \
+    echo "=== package.json scripts ===" && \
+    cat package.json | grep -A 10 '"scripts"'
 
 # 构建静态文件（带详细错误输出）
-RUN npm run build 2>&1 || (echo "=== Build failed, checking logs ===" && exit 1)
+RUN npm run build 2>&1 | tee /tmp/build.log || \
+    (echo "=== BUILD FAILED ===" && \
+     echo "=== npm install log ===" && cat /tmp/npm-install.log && \
+     echo "=== build log ===" && cat /tmp/build.log && \
+     echo "=== node_modules exists ===" && ls -la node_modules/.bin/next 2>/dev/null && \
+     exit 1)
 
 ###############################################
 # Base Image - Python

@@ -64,9 +64,9 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         no-cache: true
-        # 启用详细输出以调试构建问题
-        build-args: |
-          BUILDKIT_PROGRESS=plain
+      env:
+        # 启用详细日志
+        BUILDKIT_PROGRESS: plain
 
     - name: Output image digest
       run: echo "Image digest - ${{ steps.build-and-push.outputs.digest }}"

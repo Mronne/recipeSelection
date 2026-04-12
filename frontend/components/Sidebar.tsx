@@ -189,16 +189,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-[#E9ECEF] z-50 flex items-center justify-between px-4">
-        {pathname === '/create' ? (
-          // 创建页面：显示标题而不是 logo
-          <h1 className="text-lg font-bold text-[#212529]">创建菜谱</h1>
-        ) : (
-          // 其他页面：显示 logo
-          <Link href="/" className="flex items-center">
-            <Logo width={120} height={36} />
-          </Link>
-        )}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-[#E9ECEF] z-50 flex items-center justify-end px-4">
         <button 
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="p-2 hover:bg-[#F8F9FA] rounded-lg"

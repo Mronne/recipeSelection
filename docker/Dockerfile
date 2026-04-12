@@ -1,21 +1,29 @@
 ###############################################
 # Frontend Build (Next.js)
 ###############################################
-FROM node:20-slim AS frontend-builder
+FROM --platform=$BUILDPLATFORM node:20-slim AS frontend-builder
 
 WORKDIR /frontend
 
 # 首先复制 package.json 和 package-lock.json（如果存在）
 COPY frontend/package*.json ./
 
-# 安装依赖
-RUN npm install --prefer-offline --no-audit --no-fund
+# 安装依赖（带调试输出）
+RUN npm install --prefer-offline --no-audit --no-fund 2>&1 && \
+    echo "=== npm install completed ===" && \
+    ls -la node_modules | head -10
 
 # 复制其余前端代码
 COPY frontend .
 
-# 构建静态文件
-RUN npm run build
+# 列出要构建的文件（调试用）
+RUN echo "=== Files in /frontend ===" && \
+    ls -la && \
+    echo "=== Files in app directory ===" && \
+    ls -la app/
+
+# 构建静态文件（带详细错误输出）
+RUN npm run build 2>&1 || (echo "=== Build failed, checking logs ===" && exit 1)
 
 ###############################################
 # Base Image - Python

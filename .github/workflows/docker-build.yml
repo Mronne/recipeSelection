@@ -63,8 +63,10 @@ jobs:
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        # 禁用缓存以确保使用最新的 Dockerfile
         no-cache: true
+        # 启用详细输出以调试构建问题
+        build-args: |
+          BUILDKIT_PROGRESS=plain
 
     - name: Output image digest
       run: echo "Image digest - ${{ steps.build-and-push.outputs.digest }}"

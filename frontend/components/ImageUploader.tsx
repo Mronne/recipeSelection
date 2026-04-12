@@ -5,7 +5,7 @@ import { Camera, X } from 'lucide-react'
 
 interface ImageUploaderProps {
   value?: string
-  onChange?: (value: string) => void
+  onChange?: (url: string, file?: File) => void
 }
 
 export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
@@ -22,14 +22,14 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
       // 创建本地预览URL
       const url = URL.createObjectURL(file)
       setPreview(url)
-      onChange?.(url)
+      onChange?.(url, file)
     }
   }
 
   const handleRemove = (e: React.MouseEvent) => {
     e.stopPropagation()
     setPreview(null)
-    onChange?.('')
+    onChange?.('', undefined)
     if (inputRef.current) {
       inputRef.current.value = ''
     }

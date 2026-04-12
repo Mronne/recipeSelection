@@ -178,16 +178,23 @@ class ApiClient {
 
   // ==================== 图片上传 API ====================
 
-  async uploadRecipeImage(recipeId: string, file: File): Promise<string> {
-    const formData = new FormData()
-    formData.append('image', file)
+  async uploadRecipeImage(recipeSlug: string, file: File): Promise<string> {
+    // 读取文件为 bytes 并上传
+    const arrayBuffer = await file.arrayBuffer()
+    const bytes = new Uint8Array(arrayBuffer)
     
-    const response = await this.client.post<{ image: string }>(
-      `/recipes/${recipeId}/image`,
-      formData,
+    // 获取文件扩展名
+    const extension = file.name.split('.').pop() || 'jpg'
+    
+    const response = await this.client.put<{ image: string }>(
+      `/recipes/${recipeSlug}/image`,
+      bytes,
       {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/octet-stream',
+        },
+        params: {
+          extension: extension,
         },
       }
     )

@@ -20,6 +20,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { useCreateRecipe } from '@/hooks/useRecipes'
+import { api } from '@/lib/api'
 import { RecipeCreate } from '@/types'
 import { ALL_INGREDIENTS, UNITS } from '@/lib/ingredients-data'
 import { getAllCategories } from '@/lib/categories-data'
@@ -68,6 +69,9 @@ export default function CreateRecipe() {
     tags: [],
     category: '中餐',
   })
+  
+  // 存储实际的图片文件，用于后续上传
+  const [imageFile, setImageFile] = useState<File | null>(null)
 
   const updateRecipe = (updates: Partial<RecipeCreate>) => {
     setRecipe(prev => ({ ...prev, ...updates }))
@@ -78,7 +82,16 @@ export default function CreateRecipe() {
   const handleSubmit = async () => {
     setError('')
     const result = await create(recipe)
-    if (result.success) {
+    if (result.success && result.recipe) {
+      // 如果有图片文件，上传图片
+      if (imageFile && result.recipe.slug) {
+        try {
+          await api.uploadRecipeImage(result.recipe.slug, imageFile)
+        } catch (err) {
+          console.error('图片上传失败:', err)
+          // 图片上传失败不影响菜谱创建成功
+        }
+      }
       setShowSuccess(true)
       setTimeout(() => router.push('/'), 1500)
     } else {
@@ -306,7 +319,10 @@ function Step1BasicInfo({
       <div className="max-w-xs mx-auto mb-6">
         <ImageUploader 
           value={recipe.coverImage}
-          onChange={(url) => updateRecipe({ coverImage: url })}
+          onChange={(url, file) => {
+            updateRecipe({ coverImage: url })
+            setImageFile(file || null)
+          }}
         />
       </div>
 

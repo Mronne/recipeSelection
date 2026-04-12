@@ -1,61 +1,64 @@
-version: '3.8'
-
 services:
-  # 后端 API - Mealie
-  backend:
+  mealie:
+    container_name: wangzhe-restaurant
+    image: ghcr.io/${GITHUB_USER:-yourusername}/wangzhe-restaurant:latest
     build:
-      context: ./backend
-      dockerfile: docker/Dockerfile
-    image: ghcr.io/${GITHUB_USER:-yourusername}/recipe-backend:latest
-    container_name: recipe-backend
-    restart: unless-stopped
+      context: .
+      target: production
+      dockerfile: ./docker/Dockerfile
+    restart: always
+    volumes:
+      - ${DATA_DIR:-./data}/mealie-data:/app/data/
+      - ${DATA_DIR:-./data}/mealie-images:/app/images
     ports:
       - "9000:9000"
-    volumes:
-      # NAS 数据持久化路径
-      - ${NAS_DATA_PATH:-./data}/mealie-data:/app/data
-      - ${NAS_DATA_PATH:-./data}/mealie-images:/app/images
     environment:
-      - PUID=${PUID:-1000}
-      - PGID=${PGID:-1000}
-      - TZ=${TZ:-Asia/Shanghai}
-      - MAX_WORKERS=1
-      - WEB_CONCURRENCY=1
-      - ALLOW_SIGNUP=${ALLOW_SIGNUP:-true}
-      - API_PORT=9000
-      - API_DOCS=true
-      - LOG_LEVEL=info
-      - LOG_CONFIG_OVERRIDE=/app/data/log-config.yml
-      - BASE_URL=${BASE_URL:-http://localhost:3000}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/api/app/about", "||", "exit", "1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    networks:
-      - recipe-network
+      # 基础配置
+      PUID: "${PUID:-1000}"
+      PGID: "${PGID:-1000}"
+      TZ: "${TZ:-Asia/Shanghai}"
+      
+      # 应用配置
+      ALLOW_SIGNUP: "${ALLOW_SIGNUP:-true}"
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
+      BASE_URL: "${BASE_URL:-http://localhost:9000}"
+      
+      # 数据库配置（默认 SQLite）
+      DB_ENGINE: "${DB_ENGINE:-sqlite}"
+      
+      # Postgres 配置（可选）
+      # POSTGRES_USER: mealie
+      # POSTGRES_PASSWORD: mealie
+      # POSTGRES_SERVER: postgres
+      # POSTGRES_PORT: 5432
+      # POSTGRES_DB: mealie
+      
+      # OpenAI 配置（可选，用于智能解析）
+      # OPENAI_API_KEY: your-api-key
+      # OPENAI_MODEL: gpt-4o-mini
+      
+      # 邮件配置（可选）
+      # SMTP_HOST=
+      # SMTP_PORT=587
+      # SMTP_FROM_NAME=王者餐厅
+      # SMTP_AUTH_STRATEGY=TLS
+      # SMTP_FROM_EMAIL=
+      # SMTP_USER=
+      # SMTP_PASSWORD=
 
-  # 前端 - Next.js
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    image: ghcr.io/${GITHUB_USER:-yourusername}/recipe-frontend:latest
-    container_name: recipe-frontend
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://backend:9000
-      - NODE_ENV=production
-      - PORT=3000
-    depends_on:
-      backend:
-        condition: service_healthy
-    networks:
-      - recipe-network
-
-networks:
-  recipe-network:
-    driver: bridge
+# 可选：使用 Postgres 数据库（推荐用于生产环境）
+#   postgres:
+#     container_name: mealie-postgres
+#     image: postgres:15
+#     restart: always
+#     volumes:
+#       - ${DATA_DIR:-./data}/postgres:/var/lib/postgresql/data
+#     environment:
+#       POSTGRES_USER: mealie
+#       POSTGRES_PASSWORD: mealie
+#       POSTGRES_DB: mealie
+#     healthcheck:
+#       test: ["CMD", "pg_isready", "-U", "mealie"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5

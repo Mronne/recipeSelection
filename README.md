@@ -1,190 +1,155 @@
 # 王者餐厅 (Wangzhe Restaurant)
 
-完整的食谱管理系统，包含前端展示和后端 API，专为 NAS 家庭部署优化。
+基于 [Mealie](https://github.com/mealie-recipes/mealie) 的定制版本，使用 Next.js + React 19 重构了前端界面。
 
-## 🏗️ 系统架构
+## 🏗️ 与原版 Mealie 的区别
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        NAS (Docker)                          │
-│  ┌──────────────┐         ┌──────────────┐                  │
-│  │   Frontend   │◄───────►│   Backend    │                  │
-│  │  (Next.js)   │         │   (Mealie)   │                  │
-│  │   :3000      │         │    :9000     │                  │
-│  └──────────────┘         └──────┬───────┘                  │
-│         │                        │                          │
-│         │                 ┌──────┴──────┐                   │
-│         │                 │   SQLite    │                   │
-│         │                 │  (持久化)    │                   │
-│         │                 └─────────────┘                   │
-└─────────┼───────────────────────────────────────────────────┘
-          │
-    ┌─────┴─────┐
-    │   用户    │
-    │ 浏览器/APP │
-    └───────────┘
-```
-
-## 📦 项目结构
-
-```
-recipeSelection/
-├── frontend/          # Next.js 前端
-│   ├── app/          # 页面
-│   ├── components/   # 组件
-│   ├── Dockerfile    # 前端镜像配置
-│   └── package.json
-├── backend/          # Mealie 后端
-│   ├── mealie/       # Python 源码
-│   ├── docker/       # Docker 配置
-│   ├── Dockerfile    # 后端镜像配置
-│   └── pyproject.toml
-├── nas-config/       # NAS 部署配置
-│   └── .env.example  # 环境变量模板
-├── docker-compose.yml # 完整部署配置
-├── NAS-DEPLOY.md     # NAS 部署指南
-└── README.md         # 本文档
-```
+| 特性 | 原版 Mealie | 王者餐厅 |
+|------|-------------|----------|
+| 前端框架 | Nuxt.js 3 | Next.js 15 + React 19 |
+| UI 风格 | Vuetify | Tailwind CSS |
+| 语言支持 | 多语言 | 中文为主 |
+| 界面风格 | Material Design | 现代简洁 |
 
 ## 🚀 快速开始
 
-### 方式 1: NAS Docker 部署（推荐）
+### Docker 部署（推荐）
 
 ```bash
-# 1. 克隆仓库
-git clone https://github.com/yourusername/recipeSelection.git
-cd recipeSelection
+# 1. 克隆项目
+git clone https://github.com/yourusername/wangzhe-restaurant.git
+cd wangzhe-restaurant
 
 # 2. 配置环境变量
-cp nas-config/.env.example .env
-# 编辑 .env，修改 NAS_DATA_PATH 和 BASE_URL
+cp .env.example .env
+# 编辑 .env 文件
 
-# 3. 启动
+# 3. 启动服务
 docker-compose up -d
 
-# 4. 访问 http://your-nas-ip:3000
+# 4. 访问 http://localhost:9000
 ```
 
-**默认账号**: `admin` / `admin123`
-
-### 方式 2: 仅前端开发
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-### 方式 3: 完整开发环境
-
-```bash
-# 后端
-cd backend
-pip install -r requirements.txt
-python main.py
-
-# 前端（另一个终端）
-cd frontend
-npm install
-npm run dev
-```
-
-## 🛠️ 功能特性
-
-### 前端
-- 📱 响应式设计，支持移动端和桌面端
-- 🔍 智能食谱搜索和分类筛选
-- 👨‍🍳 智能食材和步骤解析
-- 🖼️ 头像上传和裁剪
-- 📅 膳食计划管理
-- 🛒 购物清单自动生成
-- 👤 多角色权限（管理员/用户/游客）
-
-### 后端
-- 🔐 JWT 身份认证
-- 📝 RESTful API
-- 🗄️ SQLite 数据库（可切换 PostgreSQL）
-- 🖼️ 图片上传和存储
-- 📊 数据导入/导出
-
-## 🐳 Docker 镜像
-
-### GitHub Container Registry
-
-```bash
-# 前端
-docker pull ghcr.io/yourusername/recipe-frontend:latest
-
-# 后端
-docker pull ghcr.io/yourusername/recipe-backend:latest
-
-# 运行
-docker-compose up -d
-```
-
-### 自动构建
-
-GitHub Actions 会自动构建并推送镜像：
-- 推送代码到 `main` 分支 → 构建 `latest` 标签
-- 创建版本标签 `v1.0.0` → 构建版本镜像
-
-## 📋 环境变量
+### 环境变量配置
 
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
-| `NAS_DATA_PATH` | NAS 数据存储路径 | `./data` |
-| `BASE_URL` | 外部访问地址 | `http://localhost:3000` |
-| `ALLOW_SIGNUP` | 允许注册 | `true` |
+| `DATA_DIR` | 数据存储路径 | `./data` |
 | `PUID` / `PGID` | 用户/组 ID | `1000` |
 | `TZ` | 时区 | `Asia/Shanghai` |
+| `ALLOW_SIGNUP` | 允许注册 | `true` |
+| `BASE_URL` | 外部访问地址 | `http://localhost:9000` |
 
-## 📚 文档
+### 从原版 Mealie 迁移
 
-- [NAS 部署指南](./NAS-DEPLOY.md) - Synology/QNAP/Unraid 详细部署步骤
-- [Docker 指南](./frontend/DOCKER.md) - Docker 相关文档
-- [GitHub 配置](./GITHUB-GUIDE.md) - CI/CD 配置指南
-
-## 🖥️ 支持的 NAS 系统
-
-| 系统 | 支持 | 说明 |
-|------|------|------|
-| Synology DSM | ✅ | 7.0+ |
-| QNAP QTS | ✅ | 5.0+ |
-| Unraid | ✅ | 6.10+ |
-| TrueNAS SCALE | ✅ | - |
-| 通用 Docker | ✅ | 任何支持 Docker 的系统 |
-
-## 🔒 默认账号
-
-- **管理员**: admin / admin123
-- **权限**: 管理所有内容、查看所有用户数据
-
-## 🔄 更新
+由于数据结构完全兼容原版 Mealie，您可以：
 
 ```bash
-cd recipeSelection
-git pull
-docker-compose down
-docker-compose up -d --build
+# 1. 停止原版 Mealie
+docker stop mealie
+
+# 2. 备份数据
+cp -r /path/to/mealie-data ./backup/
+
+# 3. 使用本项目的 docker-compose.yml 启动
+# 修改 DATA_DIR 指向原版数据目录
+docker-compose up -d
 ```
 
-## 💾 数据备份
+## 🛠️ 开发指南
 
-数据存储在 `${NAS_DATA_PATH}` 目录：
-- `mealie-data/` - 数据库和配置
-- `mealie-images/` - 上传的图片
+### 前端开发
 
-定期备份此目录即可。
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-## 🤝 贡献
+### 完整开发环境
 
-欢迎提交 Issue 和 Pull Request！
+```bash
+# 1. 启动后端
+cd ..
+pip install uv
+uv run python -m mealie
+
+# 2. 启动前端（另一个终端）
+cd frontend
+npm run dev
+```
+
+## 🐳 构建镜像
+
+```bash
+# 本地构建
+docker build -f docker/Dockerfile -t wangzhe-restaurant:latest .
+
+# 多架构构建（需要 buildx）
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t wangzhe-restaurant:latest \
+  -f docker/Dockerfile \
+  .
+```
+
+## 📁 项目结构
+
+```
+.
+├── mealie/              # 后端代码（与原版一致）
+├── frontend/            # 前端代码（Next.js）
+├── docker/
+│   ├── Dockerfile       # 构建配置
+│   ├── entry.sh         # 启动脚本
+│   └── healthcheck.sh   # 健康检查
+├── docker-compose.yml   # 部署配置
+├── pyproject.toml       # Python 依赖
+└── uv.lock             # 锁定文件
+```
+
+## 🔄 与 Mealie 的兼容性
+
+- ✅ API 完全兼容
+- ✅ 数据库结构一致
+- ✅ 数据导入/导出兼容
+- ✅ 配置文件格式相同
+
+## 📝 配置说明
+
+所有原版 Mealie 的配置都支持，额外添加：
+
+```yaml
+# 前端定制配置
+FRONTEND_TITLE: "王者餐厅"      # 页面标题
+FRONTEND_LOGO: ""              # 自定义 Logo URL
+```
+
+## 🐛 故障排除
+
+### 常见问题
+
+**Q: 如何备份数据？**
+```bash
+# 数据位于 DATA_DIR 指定的目录
+tar -czf backup.tar.gz ./data/
+```
+
+**Q: 如何更新？**
+```bash
+# 拉取最新镜像
+docker-compose pull
+docker-compose up -d
+```
+
+**Q: 可以和其他 Mealie 客户端一起使用吗？**
+可以！API 完全兼容，可以使用任何 Mealie 客户端。
+
+## 🤝 致谢
+
+- 后端基于 [Mealie](https://github.com/mealie-recipes/mealie) 项目
+- 前端使用 [Next.js](https://nextjs.org/) 构建
 
 ## 📄 许可证
 
 MIT License
-
-## 🙏 致谢
-
-- 前端基于 [Next.js](https://nextjs.org/) 构建
-- 后端基于 [Mealie](https://github.com/mealie-recipes/mealie) 项目

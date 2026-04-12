@@ -1,19 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: { unoptimized: true },
-  // 输出 standalone 模式，用于 Docker 部署
-  output: 'standalone',
-  // 允许所有主机访问
+  // 静态导出模式，用于嵌入 Mealie 后端
+  output: 'export',
+  distDir: 'dist',
+  // 设置基础路径（Mealie 后端会通过 / 提供前端）
+  basePath: '',
+  // 允许从任何来源访问
   allowedDevOrigins: ['*'],
-  async rewrites() {
-    // Docker 环境中使用环境变量配置 API 地址
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${apiUrl}/api/:path*`,
-      },
-    ]
-  },
 }
 module.exports = nextConfig

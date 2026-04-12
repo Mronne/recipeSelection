@@ -22,6 +22,7 @@ import { usePathname } from 'next/navigation'
 import { clearToken } from '@/lib/auth'
 import { cn } from '@/lib/utils'
 import { isAdmin } from '@/lib/auth'
+import Logo from './Logo'
 
 const navItems = [
   { icon: Home, label: '首页', href: '/' },
@@ -59,10 +60,8 @@ export default function Sidebar() {
     <>
       {/* Logo */}
       <div className="p-6 border-b border-[#E9ECEF]">
-        <Link href="/" className="flex items-center gap-2">
-          <Crown className="w-6 h-6 text-[#FFD700] flex-shrink-0" />
-          <span className="text-xl font-bold text-[#212529]">王者餐厅</span>
-          <Crown className="w-6 h-6 text-[#FFD700] flex-shrink-0" />
+        <Link href="/" className="flex justify-center">
+          <Logo width={160} height={48} />
         </Link>
       </div>
 
@@ -191,10 +190,8 @@ export default function Sidebar() {
     <>
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-[#E9ECEF] z-50 flex items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <Crown className="w-5 h-5 text-[#FFD700]" />
-          <span className="text-lg font-bold text-[#212529]">王者餐厅</span>
-          <Crown className="w-5 h-5 text-[#FFD700]" />
+        <Link href="/" className="flex items-center">
+          <Logo width={120} height={36} />
         </Link>
         <button 
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

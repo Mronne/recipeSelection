@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # 后端 API - Mealie
+  backend:
+    build:
+      context: ./backend
+      dockerfile: docker/Dockerfile
+    image: ghcr.io/${GITHUB_USER:-yourusername}/recipe-backend:latest
+    container_name: recipe-backend
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    volumes:
+      # NAS 数据持久化路径
+      - ${NAS_DATA_PATH:-./data}/mealie-data:/app/data
+      - ${NAS_DATA_PATH:-./data}/mealie-images:/app/images
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Asia/Shanghai}
+      - MAX_WORKERS=1
+      - WEB_CONCURRENCY=1
+      - ALLOW_SIGNUP=${ALLOW_SIGNUP:-true}
+      - API_PORT=9000
+      - API_DOCS=true
+      - LOG_LEVEL=info
+      - LOG_CONFIG_OVERRIDE=/app/data/log-config.yml
+      - BASE_URL=${BASE_URL:-http://localhost:3000}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/api/app/about", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - recipe-network
+
+  # 前端 - Next.js
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: ghcr.io/${GITHUB_USER:-yourusername}/recipe-frontend:latest
+    container_name: recipe-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:9000
+      - NODE_ENV=production
+      - PORT=3000
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - recipe-network
+
+networks:
+  recipe-network:
+    driver: bridge

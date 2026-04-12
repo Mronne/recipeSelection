@@ -1,0 +1,66 @@
+# ==========================================
+# 全局 Git 忽略配置
+# ==========================================
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Data directories (NAS storage)
+data/
+mealie-data/
+mealie-images/
+postgres-data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Git
+!.gitkeep
+
+# ==========================================
+# 前端忽略 (frontend/.gitignore)
+# ==========================================
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/.env*.local
+
+# ==========================================
+# 后端忽略 (backend/.gitignore)
+# ==========================================
+backend/__pycache__/
+backend/*.py[cod]
+backend/*$py.class
+backend/*.so
+backend/.Python
+backend/.venv/
+backend/venv/
+backend/env/
+backend/.env
+backend/*.egg-info/
+backend/dist/
+backend/build/
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+backend/.mypy_cache/

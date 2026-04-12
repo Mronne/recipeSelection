@@ -1,4 +1,4 @@
-name: Export Docker Images for Download
+name: Export Docker Images for Download (ARM64)
 
 on:
   push:
@@ -15,11 +15,16 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: read  # 需要读取私有镜像
+      packages: read
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: linux/arm64
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -31,10 +36,10 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Pull and save backend image
+    - name: Pull and save backend image (ARM64)
       run: |
-        # 拉取镜像
-        docker pull ${{ env.BACKEND_IMAGE }}
+        # 拉取 ARM64 版本的镜像
+        docker pull --platform linux/arm64 ${{ env.BACKEND_IMAGE }}
         
         # 保存为 tar 文件
         docker save ${{ env.BACKEND_IMAGE }} > mealie-backend.tar
@@ -42,7 +47,9 @@ jobs:
         # 压缩以减小体积
         gzip -c mealie-backend.tar > mealie-backend.tar.gz
         
-        # 显示文件大小
+        # 显示文件大小和架构信息
+        echo "=== 镜像信息 ==="
+        docker inspect ${{ env.BACKEND_IMAGE }} | grep -i arch
         ls -lh mealie-backend.tar*
 
     - name: Upload backend image artifact
@@ -50,7 +57,7 @@ jobs:
       with:
         name: mealie-backend-image
         path: mealie-backend.tar.gz
-        retention-days: 30  # 保留 30 天
+        retention-days: 30
 
   export-frontend:
     runs-on: ubuntu-latest
@@ -62,6 +69,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: linux/arm64
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
@@ -72,10 +84,10 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Pull and save frontend image
+    - name: Pull and save frontend image (ARM64)
       run: |
-        # 拉取镜像
-        docker pull ${{ env.FRONTEND_IMAGE }}
+        # 拉取 ARM64 版本的镜像
+        docker pull --platform linux/arm64 ${{ env.FRONTEND_IMAGE }}
         
         # 保存为 tar 文件
         docker save ${{ env.FRONTEND_IMAGE }} > mealie-frontend.tar
@@ -83,7 +95,9 @@ jobs:
         # 压缩以减小体积
         gzip -c mealie-frontend.tar > mealie-frontend.tar.gz
         
-        # 显示文件大小
+        # 显示文件大小和架构信息
+        echo "=== 镜像信息 ==="
+        docker inspect ${{ env.FRONTEND_IMAGE }} | grep -i arch
         ls -lh mealie-frontend.tar*
 
     - name: Upload frontend image artifact
@@ -126,7 +140,11 @@ jobs:
         # 创建导入脚本
         cat > deployment/load-images.sh << 'EOF'
         #!/bin/bash
-        echo "=== 导入 Mealie 镜像到极空间 ==="
+        echo "=== 导入 Mealie 镜像到极空间 (ARM64) ==="
+        echo ""
+        
+        # 检查架构
+        echo "当前架构: $(uname -m)"
         echo ""
         
         # 解压并导入后端镜像
@@ -139,7 +157,8 @@ jobs:
         
         echo ""
         echo "=== 导入完成 ==="
-        echo "查看镜像: docker images | grep recipeselection"
+        echo "查看镜像:"
+        docker images | grep recipeselection
         EOF
         
         chmod +x deployment/load-images.sh
@@ -149,11 +168,13 @@ jobs:
         zip -r ../mealie-deployment-package.zip .
         cd ..
         
+        echo "=== 部署包内容 ==="
+        unzip -l mealie-deployment-package.zip
         ls -lh mealie-deployment-package.zip
 
     - name: Upload deployment package
       uses: actions/upload-artifact@v4
       with:
-        name: mealie-deployment-package
+        name: mealie-deployment-package-arm64
         path: mealie-deployment-package.zip
         retention-days: 30

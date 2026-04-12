@@ -1,7 +1,8 @@
 services:
+  # Mealie 后端服务
   mealie:
-    container_name: wangzhe-restaurant
-    image: ghcr.io/${GITHUB_USER:-yourusername}/wangzhe-restaurant:latest
+    container_name: wangzhe-restaurant-api
+    image: ghcr.io/${GITHUB_USER:-mronne}/recipeselection:latest
     build:
       context: .
       target: production
@@ -45,6 +46,27 @@ services:
       # SMTP_FROM_EMAIL=
       # SMTP_USER=
       # SMTP_PASSWORD=
+    networks:
+      - mealie-network
+
+  # Next.js 前端服务（可选，独立部署时使用）
+  # 如果你希望前后端分离，取消下面的注释
+  # frontend:
+  #   container_name: wangzhe-restaurant-web
+  #   image: ghcr.io/${GITHUB_USER:-mronne}/recipeselection-frontend:latest
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     # 后端 API 地址（使用 Docker 内部网络）
+  #     - NEXT_PUBLIC_API_URL=http://mealie:9000
+  #   networks:
+  #     - mealie-network
+  #   depends_on:
+  #     - mealie
 
 # 可选：使用 Postgres 数据库（推荐用于生产环境）
 #   postgres:
@@ -62,3 +84,9 @@ services:
 #       interval: 10s
 #       timeout: 5s
 #       retries: 5
+#     networks:
+#       - mealie-network
+
+networks:
+  mealie-network:
+    driver: bridge

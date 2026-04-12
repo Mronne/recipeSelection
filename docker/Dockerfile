@@ -1,35 +1,21 @@
 ###############################################
-# Frontend Build (Next.js)
+# Frontend Build (Next.js - Standalone Mode)
 ###############################################
 FROM --platform=$BUILDPLATFORM node:20-slim AS frontend-builder
 
 WORKDIR /frontend
 
-# 首先复制 package.json 和 package-lock.json（如果存在）
+# Copy package files first for caching
 COPY frontend/package*.json ./
 
-# 安装依赖（带调试输出）
-RUN npm install --prefer-offline --no-audit --no-fund 2>&1 | tee /tmp/npm-install.log || \
-    (cat /tmp/npm-install.log && exit 1)
+# Install dependencies
+RUN npm install --prefer-offline --no-audit --no-fund
 
-# 复制其余前端代码
+# Copy frontend source
 COPY frontend .
 
-# 列出要构建的文件（调试用）
-RUN echo "=== Files in /frontend ===" && \
-    ls -la && \
-    echo "=== Files in app directory ===" && \
-    ls -la app/ && \
-    echo "=== package.json scripts ===" && \
-    cat package.json | grep -A 10 '"scripts"'
-
-# 构建静态文件（带详细错误输出）
-RUN npm run build 2>&1 | tee /tmp/build.log || \
-    (echo "=== BUILD FAILED ===" && \
-     echo "=== npm install log ===" && cat /tmp/npm-install.log && \
-     echo "=== build log ===" && cat /tmp/build.log && \
-     echo "=== node_modules exists ===" && ls -la node_modules/.bin/next 2>/dev/null && \
-     exit 1)
+# Build standalone application
+RUN npm run build
 
 ###############################################
 # Base Image - Python
@@ -46,10 +32,8 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_DEFAULT_TIMEOUT=100 \
     VENV_PATH="/opt/mealie"
 
-# prepend venv to path
 ENV PATH="$VENV_PATH/bin:$PATH"
 
-# create user account
 RUN useradd -u 911 -U -d $MEALIE_HOME -s /bin/bash abc \
     && usermod -G users abc \
     && mkdir $MEALIE_HOME
@@ -67,19 +51,13 @@ RUN pip install uv
 
 WORKDIR /mealie
 
-# copy project files here to ensure they will be cached.
 COPY uv.lock pyproject.toml ./
 COPY mealie ./mealie
-
-# Copy frontend dist to package it into the wheel
-COPY --from=frontend-builder /frontend/dist ./mealie/frontend
 
 # Build the source and binary package
 RUN uv build --out-dir dist
 
-# Create the requirements file, which is used to install the built package and
-# its pinned dependencies later. mealie is included to ensure the built one is
-# what's installed.
+# Create the requirements file
 RUN uv export --no-editable --no-emit-project --extra pgsql --format requirements-txt --output-file dist/requirements.txt \
     && MEALIE_VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])") \
     && echo "mealie[pgsql]==${MEALIE_VERSION} \\" >> dist/requirements.txt \
@@ -103,24 +81,20 @@ RUN apt-get update \
     libpq-dev \
     libwebp-dev \
     ffmpeg \
-    # LDAP Dependencies
     libsasl2-dev libldap2-dev libssl-dev \
     gnupg gnupg2 gnupg1 \
     && rm -rf /var/lib/apt/lists/*
 RUN python3 -m venv --upgrade-deps $VENV_PATH
 
-# Install the wheel and all dependencies into the venv
 FROM venv-builder-base AS venv-builder
 
-# Copy built package (wheel) and its dependency requirements
 COPY --from=packages * /dist/
 
-# Install the wheel with exact versions of dependencies into the venv
 RUN . $VENV_PATH/bin/activate \
     && pip install --require-hashes -r /dist/requirements.txt --find-links /dist
 
 ###############################################
-# Production Image
+# Production Image (Backend + Frontend Runner)
 ###############################################
 FROM python-base AS production
 ENV PRODUCTION=true
@@ -139,13 +113,10 @@ RUN apt-get update \
     libldap2 \
     && rm -rf /var/lib/apt/lists/*
 
-# create directory used for Docker Secrets
 RUN mkdir -p /run/secrets
 
-# Copy venv into image. It contains a fully-installed mealie backend and frontend.
 COPY --from=venv-builder $VENV_PATH $VENV_PATH
 
-# install nltk data for the ingredient parser
 ENV NLTK_DATA="/nltk_data/"
 RUN mkdir -p $NLTK_DATA
 RUN python -m nltk.downloader -d $NLTK_DATA averaged_perceptron_tagger_eng
@@ -166,3 +137,26 @@ COPY ./docker/entry.sh $MEALIE_HOME/run.sh
 
 RUN chmod +x $MEALIE_HOME/run.sh
 ENTRYPOINT ["/app/run.sh"]
+
+###############################################
+# Frontend Only Image (Optional)
+###############################################
+FROM node:20-slim AS frontend-production
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Copy standalone output from builder
+COPY --from=frontend-builder /frontend/public ./public
+COPY --from=frontend-builder /frontend/.next/standalone ./
+COPY --from=frontend-builder /frontend/.next/static ./.next/static
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))"
+
+CMD ["node", "server.js"]

@@ -169,6 +169,7 @@ export function fromBackendRecipe(backend: MealieRecipe): Recipe {
   
   return {
     id: backend.id,
+    slug: backend.slug || backend.id,  // 如果没有 slug 用 id 代替
     name: backend.name,
     description: backend.description || '',
     coverImage: backend.image || '/images/recipe-placeholder.svg',

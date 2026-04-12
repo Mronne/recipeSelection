@@ -18,6 +18,7 @@ export interface Step {
 
 export interface Recipe {
   id: string
+  slug: string
   name: string
   description: string
   coverImage: string

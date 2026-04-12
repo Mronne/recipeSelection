@@ -125,9 +125,11 @@ export const demoApi = {
 
   async createRecipe(data: RecipeCreate): Promise<Recipe> {
     await delay(800)
+    const id = Date.now().toString()
     const newRecipe: Recipe = {
       ...data,
-      id: Date.now().toString(),
+      id,
+      slug: id,  // 添加 slug 字段
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       ingredients: data.ingredients.map((ing, i) => ({ ...ing, id: `ing-${i}` })),

@@ -1,0 +1,57 @@
+# ==========================================
+# 极空间 Z2 PRO 部署配置
+# 架构: ARM64 (linux/arm64)
+# ==========================================
+
+version: "3.8"
+
+services:
+  # 后端 API 服务
+  mealie:
+    container_name: wangzhe-restaurant-api
+    image: ghcr.io/mronne/recipeselection:main
+    restart: always
+    ports:
+      - "9000:9000"
+    volumes:
+      # 数据持久化存储
+      - ./data/mealie-data:/app/data/
+      - ./data/mealie-images:/app/images
+    environment:
+      # 用户权限
+      - PUID=1000
+      - PGID=1000
+      # 时区
+      - TZ=Asia/Shanghai
+      # 允许注册
+      - ALLOW_SIGNUP=true
+      # 日志级别
+      - LOG_LEVEL=info
+      # 应用基础 URL（修改为你的极空间IP）
+      - BASE_URL=http://192.168.1.100:9000
+      # 数据库（SQLite 适合个人使用）
+      - DB_ENGINE=sqlite
+      # OpenAI 配置（可选，用于智能解析食谱）
+      # - OPENAI_API_KEY=your-api-key
+      # - OPENAI_MODEL=gpt-4o-mini
+    networks:
+      - mealie-network
+
+  # 前端 Web 服务
+  frontend:
+    container_name: wangzhe-restaurant-web
+    image: ghcr.io/mronne/recipeselection-frontend:main
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      # 后端 API 地址（Docker 内部网络通信）
+      - NEXT_PUBLIC_API_URL=http://mealie:9000
+    networks:
+      - mealie-network
+    depends_on:
+      - mealie
+
+networks:
+  mealie-network:
+    driver: bridge

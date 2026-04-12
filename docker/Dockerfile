@@ -15,7 +15,8 @@ RUN npm install --prefer-offline --no-audit --no-fund
 COPY frontend .
 
 # Build standalone application
-RUN npm run build
+RUN npm run build && \
+    cp -r .next/static .next/standalone/.next/ 2>/dev/null || true
 
 ###############################################
 # Base Image - Python

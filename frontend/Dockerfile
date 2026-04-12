@@ -16,7 +16,8 @@ RUN npm install --prefer-offline --no-audit --no-fund
 COPY . .
 
 # 构建 standalone 应用
-RUN npm run build
+RUN npm run build && \
+    cp -r .next/static .next/standalone/.next/ 2>/dev/null || true
 
 # 阶段2: 运行
 FROM node:20-slim AS runner

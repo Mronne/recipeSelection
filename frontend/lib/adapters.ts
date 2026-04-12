@@ -171,7 +171,7 @@ export function fromBackendRecipe(backend: MealieRecipe): Recipe {
     id: backend.id,
     name: backend.name,
     description: backend.description || '',
-    coverImage: backend.image || '/images/recipe-placeholder.jpg',
+    coverImage: backend.image || '/images/recipe-placeholder.svg',
     prepTime: parseTime(backend.prep_time) || 0,
     cookTime: parseTime(backend.perform_time) || 0,
     servings: parseServings(backend.recipe_yield) || 2,

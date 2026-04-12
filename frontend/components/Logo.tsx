@@ -15,7 +15,8 @@ export default function Logo({ width = 200, height = 60, className = '' }: LogoP
       alt="王者餐厅"
       width={width}
       height={height}
-      className={`object-contain ${className}`}
+      className={`object-contain w-auto h-auto ${className}`}
+      style={{ maxWidth: width, maxHeight: height }}
       priority
     />
   )

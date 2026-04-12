@@ -223,7 +223,8 @@ export default function CreateRecipe() {
                 <Step1BasicInfo 
                   key="step1"
                   recipe={recipe} 
-                  updateRecipe={updateRecipe} 
+                  updateRecipe={updateRecipe}
+                  onImageSelect={setImageFile}
                 />
               )}
               {currentStep === 1 && (
@@ -301,10 +302,12 @@ export default function CreateRecipe() {
 // Step 1: Basic Info
 function Step1BasicInfo({ 
   recipe, 
-  updateRecipe 
+  updateRecipe,
+  onImageSelect
 }: { 
   recipe: RecipeCreate
   updateRecipe: (u: Partial<RecipeCreate>) => void
+  onImageSelect: (file: File | null) => void
 }) {
   return (
     <motion.div
@@ -321,7 +324,7 @@ function Step1BasicInfo({
           value={recipe.coverImage}
           onChange={(url, file) => {
             updateRecipe({ coverImage: url })
-            setImageFile(file || null)
+            onImageSelect(file || null)
           }}
         />
       </div>

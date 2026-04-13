@@ -173,7 +173,7 @@ export function fromBackendRecipe(backend: MealieRecipe): Recipe {
     name: backend.name,
     description: backend.description || '',
     coverImage: backend.slug 
-      ? `${process.env.NODE_ENV === 'development' ? 'http://localhost:9000' : ''}/api/recipes/${backend.slug}/image${backend.image ? '?c=' + backend.image : ''}`
+      ? `http://localhost:9000/api/recipes/${backend.slug}/image${backend.image ? '?c=' + backend.image : ''}`
       : '/images/recipe-placeholder.svg',
     prepTime: parseTime(backend.prep_time) || 0,
     cookTime: parseTime(backend.perform_time) || 0,

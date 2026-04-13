@@ -292,10 +292,8 @@ class ApiClient {
 
   // 获取食谱图片完整 URL（用于直接显示）
   getRecipeImageUrl(recipeSlug: string, cacheKey?: string): string {
-    // 开发环境使用完整后端地址，生产环境使用相对路径
-    const baseUrl = process.env.NODE_ENV === 'development' ? BACKEND_URL : ''
-    // Mealie 使用 /api/recipes/{slug}/image 获取图片，可以添加缓存键
-    const url = `${baseUrl}/api/recipes/${recipeSlug}/image`
+    // 使用完整后端地址
+    const url = `${BACKEND_URL}/api/recipes/${recipeSlug}/image`
     return cacheKey ? `${url}?c=${cacheKey}` : url
   }
 }

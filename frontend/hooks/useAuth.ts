@@ -30,7 +30,7 @@ export function useAuth() {
           setIsAuthenticated(true)
         })
         .catch(() => {
-          api.clearToken()
+          // 获取用户信息失败时不自动清除token，避免网络抖动导致被登出
         })
         .finally(() => setIsLoading(false))
     } else {

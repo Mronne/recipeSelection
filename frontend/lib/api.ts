@@ -46,10 +46,6 @@ class ApiClient {
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
-        if (error.response?.status === 401) {
-          // Token 过期，清除登录状态（但不自动跳转，由页面处理）
-          this.clearToken()
-        }
         return Promise.reject(error)
       }
     )

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2, Eye, EyeOff, Crown, User, Shield, UserPlus, ChevronDown } from 'lucide-react'
-import { setCurrentUser, setToken, createAdminUser, createRegularUser, createGuestUser } from '@/lib/auth'
+import { setCurrentUser, setToken, clearToken, createAdminUser, createRegularUser, createGuestUser } from '@/lib/auth'
 import Logo from '@/components/Logo'
 
 type UserRole = 'admin' | 'user' | 'guest'
@@ -63,11 +63,21 @@ export default function LoginPage() {
 
         if (res.ok) {
           const data = await res.json()
+          // 注册成功后需要调用登录接口获取真正的 access_token
+          const loginBody = new URLSearchParams()
+          loginBody.append('username', formData.username)
+          loginBody.append('password', formData.password)
+          const loginRes = await fetch('/api/auth/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: loginBody,
+          })
+          if (loginRes.ok) {
+            const loginData = await loginRes.json()
+            setToken(loginData.access_token)
+          }
           const user = createRegularUser(data.username || formData.username, data.email)
           setCurrentUser(user)
-          if (data.access_token) {
-            setToken(data.access_token)
-          }
           localStorage.setItem('user_role', 'user')
           redirectToHome()
         } else {
@@ -121,42 +131,18 @@ export default function LoginPage() {
           
           redirectToHome()
         } else {
-          // 后端登录失败，检查是否是默认管理员
-          if (formData.username === DEFAULT_ADMIN.username && 
-              formData.password === DEFAULT_ADMIN.password &&
-              role === 'admin') {
-            const user = createAdminUser()
-            user.username = DEFAULT_ADMIN.username
-            setCurrentUser(user)
-            setToken('default-admin-token')
-            localStorage.setItem('user_role', 'admin')
-            redirectToHome()
+          // 处理非 JSON 响应
+          const contentType = res.headers.get('content-type')
+          if (contentType && contentType.includes('application/json')) {
+            const err = await res.json()
+            setError(typeof err.detail === 'string' ? err.detail : JSON.stringify(err))
           } else {
-            // 处理非 JSON 响应
-            const contentType = res.headers.get('content-type')
-            if (contentType && contentType.includes('application/json')) {
-              const err = await res.json()
-              setError(typeof err.detail === 'string' ? err.detail : JSON.stringify(err))
-            } else {
-              const text = await res.text()
-              setError(`服务器错误 (${res.status}): ${text.substring(0, 100)}`)
-            }
+            const text = await res.text()
+            setError(`服务器错误 (${res.status}): ${text.substring(0, 100)}`)
           }
         }
       } catch (err: any) {
-        // 网络错误，检查是否是默认管理员
-        if (formData.username === DEFAULT_ADMIN.username && 
-            formData.password === DEFAULT_ADMIN.password &&
-            role === 'admin') {
-          const user = createAdminUser()
-          user.username = DEFAULT_ADMIN.username
-          setCurrentUser(user)
-          setToken('default-admin-token')
-          localStorage.setItem('user_role', 'admin')
-          redirectToHome()
-        } else {
-          setError(err?.message || '网络错误，请检查后端服务')
-        }
+        setError(err?.message || '网络错误，请检查后端服务')
       } finally {
         setIsLoading(false)
       }
@@ -167,7 +153,7 @@ export default function LoginPage() {
   const guestMode = () => {
     const guest = createGuestUser()
     setCurrentUser(guest)
-    setToken('guest-token')
+    clearToken()
     localStorage.setItem('guest_mode', 'true')
     localStorage.setItem('user_role', 'guest')
     redirectToHome()

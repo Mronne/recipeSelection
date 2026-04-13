@@ -291,14 +291,12 @@ class ApiClient {
   }
 
   // 获取食谱图片完整 URL（用于直接显示）
-  getRecipeImageUrl(recipeId: string, imageName?: string): string {
+  getRecipeImageUrl(recipeSlug: string, cacheKey?: string): string {
     // 开发环境使用完整后端地址，生产环境使用相对路径
     const baseUrl = process.env.NODE_ENV === 'development' ? BACKEND_URL : ''
-    if (imageName) {
-      return `${baseUrl}/api/recipes/${recipeId}/images/${imageName}`
-    }
-    // 默认返回缩略图
-    return `${baseUrl}/api/recipes/${recipeId}/image`
+    // Mealie 使用 /api/recipes/{slug}/image 获取图片，可以添加缓存键
+    const url = `${baseUrl}/api/recipes/${recipeSlug}/image`
+    return cacheKey ? `${url}?c=${cacheKey}` : url
   }
 }
 

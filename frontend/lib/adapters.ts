@@ -172,7 +172,9 @@ export function fromBackendRecipe(backend: MealieRecipe): Recipe {
     slug: backend.slug || backend.id,  // 如果没有 slug 用 id 代替
     name: backend.name,
     description: backend.description || '',
-    coverImage: backend.image || '/images/recipe-placeholder.svg',
+    coverImage: backend.slug 
+      ? `${process.env.NODE_ENV === 'development' ? 'http://localhost:9000' : ''}/api/recipes/${backend.slug}/image${backend.image ? '?c=' + backend.image : ''}`
+      : '/images/recipe-placeholder.svg',
     prepTime: parseTime(backend.prep_time) || 0,
     cookTime: parseTime(backend.perform_time) || 0,
     servings: parseServings(backend.recipe_yield) || 2,

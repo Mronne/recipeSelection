@@ -49,9 +49,9 @@ RUN uv build --out-dir dist
 # Create the requirements file
 RUN uv export --no-editable --no-emit-project --extra pgsql --format requirements-txt --output-file dist/requirements.txt \
     && MEALIE_VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])") \
-    && echo "mealie[pgsql]==${MEALIE_VERSION} \" >> dist/requirements.txt \
+    && printf 'mealie[pgsql]==%s \\\n' "$MEALIE_VERSION" >> dist/requirements.txt \
     && pip hash dist/mealie-${MEALIE_VERSION}-py3-none-any.whl | tail -n1 | tr -d '\n' >> dist/requirements.txt \
-    && echo " \" >> dist/requirements.txt \
+    && printf ' \\\n' >> dist/requirements.txt \
     && pip hash dist/mealie-${MEALIE_VERSION}.tar.gz | tail -n1 >> dist/requirements.txt
 
 ###############################################

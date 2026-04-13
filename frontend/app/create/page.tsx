@@ -27,6 +27,7 @@ import { getAllCategories } from '@/lib/categories-data'
 import { parseRecipeText } from '@/lib/recipe-parser'
 import ImageUploader from '@/components/ImageUploader'
 import { Sparkles, Wand2 } from 'lucide-react'
+import { useAuthGuard } from '@/hooks/useAuthGuard'
 
 const DIFFICULTIES = [
   { value: 'easy', label: '简单', color: '#4CAF50' },
@@ -43,6 +44,7 @@ const isGuestUser = () => {
 }
 
 export default function CreateRecipe() {
+  useAuthGuard('logged-in')
   const router = useRouter()
   const { create, isLoading } = useCreateRecipe()
   const [currentStep, setCurrentStep] = useState(0)

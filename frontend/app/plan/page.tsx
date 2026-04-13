@@ -15,10 +15,12 @@ import {
   MealPlan 
 } from '@/lib/meal-plan'
 import { isAdmin, getCurrentUser, canGenerateShoppingList } from '@/lib/auth'
+import { useAuthGuard } from '@/hooks/useAuthGuard'
 
 const WEEK_DAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
 
 export default function PlanPage() {
+  useAuthGuard('logged-in')
   const [plans, setPlans] = useState<MealPlan[]>([])
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [createType, setCreateType] = useState<'daily' | 'weekly'>('daily')

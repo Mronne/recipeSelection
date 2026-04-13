@@ -17,16 +17,14 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { useRecipe } from '@/hooks/useRecipes'
 import { useFavorites } from '@/hooks/useFavorites'
 import { formatTime, getDifficultyLabel, getDifficultyColor } from '@/lib/utils'
 
-export default function RecipeDetailClient() {
-  const params = useParams()
+export default function RecipeDetailClient({ recipeId }: { recipeId: string }) {
   const router = useRouter()
-  const recipeId = params.id as string
   
   const { recipe, isLoading, error, remove } = useRecipe(recipeId)
   const { isFavorite, toggleFavorite, canUseFavorites } = useFavorites()
@@ -134,7 +132,7 @@ export default function RecipeDetailClient() {
                 <Share2 className="w-5 h-5" />
               </button>
               <Link 
-                href={`/recipe/${recipeId}/edit`}
+                href={`/recipe/edit?id=${recipeId}`}
                 className="p-2 text-[#868E96] hover:text-[#212529] transition-colors rounded-lg hover:bg-[#F8F9FA]"
               >
                 <Edit2 className="w-5 h-5" />

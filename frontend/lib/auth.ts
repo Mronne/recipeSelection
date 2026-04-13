@@ -146,3 +146,27 @@ export function createGuestUser(): AuthUser {
     role: 'guest',
   }
 }
+
+// 从后端获取当前真实用户信息
+export async function fetchCurrentUser(): Promise<AuthUser | null> {
+  if (typeof window === 'undefined') return null
+  const token = localStorage.getItem('mealie_token')
+  if (!token) return null
+
+  try {
+    const res = await fetch('/api/users/self', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    return {
+      id: data.id,
+      username: data.username,
+      email: data.email,
+      role: data.admin ? 'admin' : 'user',
+      token,
+    }
+  } catch {
+    return null
+  }
+}

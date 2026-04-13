@@ -49,7 +49,7 @@ export default function SearchPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <Link href={`/recipe/${recipe.id}`}>
+                  <Link href={`/recipe/detail?id=${recipe.id}`}>
                     <div className="bg-white rounded-xl border border-[#E9ECEF] overflow-hidden hover:border-[#4CAF50]">
                       {/* 图片区域 - 移动端更小的高度 */}
                       <div className="relative aspect-[16/9] sm:aspect-[4/3] bg-[#F1F3F5] overflow-hidden max-h-[160px] sm:max-h-none">

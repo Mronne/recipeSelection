@@ -181,7 +181,7 @@ function RecipeCard({ recipe, index }: { recipe: Recipe; index: number }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
     >
-      <Link href={`/recipe/${recipe.id}`}>
+      <Link href={`/recipe/detail?id=${recipe.id}`}>
         <div className="group bg-white rounded-xl border border-[#E9ECEF] overflow-hidden hover:border-[#4CAF50] hover:shadow-lg transition-all duration-300 cursor-pointer">
           {/* Image Container - 移动端更小的高度 */}
           <div className="relative aspect-[16/9] sm:aspect-[4/3] overflow-hidden bg-[#F1F3F5] max-h-[180px] sm:max-h-none">

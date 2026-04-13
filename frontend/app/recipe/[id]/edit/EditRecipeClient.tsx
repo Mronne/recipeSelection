@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Check, Plus, X, GripVertical } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { api } from '@/lib/api'
 import { Recipe, RecipeCreate } from '@/types'
@@ -16,10 +16,8 @@ const DIFFICULTIES = [
   { value: 'hard', label: '困难', color: '#F44336' },
 ]
 
-export default function EditRecipeClient() {
-  const params = useParams()
+export default function EditRecipeClient({ recipeId }: { recipeId: string }) {
   const router = useRouter()
-  const recipeId = params.id as string
   
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -75,7 +73,7 @@ export default function EditRecipeClient() {
     try {
       await api.updateRecipe(recipeId, recipe as RecipeCreate)
       alert('保存成功！')
-      router.push(`/recipe/${recipeId}`)
+      router.push(`/recipe/detail?id=${recipeId}`)
     } catch (err) {
       alert('保存失败，请重试')
     } finally {
@@ -106,7 +104,7 @@ export default function EditRecipeClient() {
         <header className="sticky top-16 lg:top-0 z-40 bg-white border-b border-[#E9ECEF] px-4 sm:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href={`/recipe/${recipeId}`} className="p-2 hover:bg-[#F8F9FA] rounded-lg">
+              <Link href={`/recipe/detail?id=${recipeId}`} className="p-2 hover:bg-[#F8F9FA] rounded-lg">
                 <ArrowLeft className="w-6 h-6 text-[#495057]" />
               </Link>
               <h1 className="text-xl font-bold text-[#212529]">编辑菜谱</h1>

@@ -11,6 +11,7 @@ import Sidebar from '@/components/Sidebar'
 import { isAdmin, getCurrentUser, AuthUser } from '@/lib/auth'
 import { useRecipes } from '@/hooks/useRecipes'
 import { api } from '@/lib/api'
+import { useAuthGuard } from '@/hooks/useAuthGuard'
 
 interface BackendUser {
   id: string
@@ -28,6 +29,7 @@ const MOCK_FAVORITES: Record<string, string[]> = {
 }
 
 export default function AdminPage() {
+  useAuthGuard('admin')
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
   const [activeTab, setActiveTab] = useState<'users' | 'favorites'>('users')

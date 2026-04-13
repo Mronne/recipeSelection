@@ -10,7 +10,8 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { getShoppingList, saveShoppingList, toggleShoppingItem, ShoppingItem, getMealPlans } from '@/lib/meal-plan'
-import { isAdmin, isGuest, getCurrentUser } from '@/lib/auth'
+import { isAdmin, isGuest, getCurrentUser, isLoggedIn } from '@/lib/auth'
+import { useAuthGuard } from '@/hooks/useAuthGuard'
 
 const CATEGORIES = ['肉类', '蔬菜', '水果', '主食', '调料', '其他']
 
@@ -34,6 +35,7 @@ function ShoppingLoading() {
 }
 
 function ShoppingContent() {
+  useAuthGuard('logged-in')
   const searchParams = useSearchParams()
   const planId = searchParams.get('planId')
   
@@ -44,12 +46,12 @@ function ShoppingContent() {
   const [userRole, setUserRole] = useState<string>('')
 
   useEffect(() => {
-    // 检查权限
+    // 检查权限：所有登录用户（非游客）都可以查看购物清单
     const user = getCurrentUser()
     setUserRole(user?.role || '未知')
-    setHasPermission(isAdmin())
+    setHasPermission(isLoggedIn())
     
-    if (planId && isAdmin()) {
+    if (planId && isLoggedIn()) {
       const list = getShoppingList(planId)
       setItems(list)
       

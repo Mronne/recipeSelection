@@ -15,7 +15,7 @@ export default function RecipeCard({ recipe, index = 0 }: RecipeCardProps) {
       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05, ease: [0.25, 0.1, 0.25, 1] }}
     >
-      <Link href={`/recipe/${recipe.id}`}>
+      <Link href={`/recipe/detail?id=${recipe.id}`}>
         <div className="group bg-white rounded-2xl overflow-hidden shadow-sm card-hover cursor-pointer">
           <div className="relative aspect-[16/10] overflow-hidden">
             <Image src={recipe.coverImage} alt={recipe.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />

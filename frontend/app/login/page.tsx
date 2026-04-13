@@ -2,26 +2,18 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2, Eye, EyeOff, Crown, User, Shield, UserPlus, ChevronDown } from 'lucide-react'
-import { setCurrentUser, setToken, clearToken, createAdminUser, createRegularUser, createGuestUser } from '@/lib/auth'
+import { Loader2, Eye, EyeOff, Crown, User, UserPlus } from 'lucide-react'
+import { setCurrentUser, setToken, clearToken, createGuestUser, fetchCurrentUser } from '@/lib/auth'
 import Logo from '@/components/Logo'
 
-type UserRole = 'admin' | 'user' | 'guest'
 type AuthMode = 'login' | 'register'
-
-// 默认管理员账号（折叠显示）
-const DEFAULT_ADMIN = {
-  username: 'admin',
-  password: 'admin123'
-}
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>('')
   const [showPassword, setShowPassword] = useState(false)
-  const [role, setRole] = useState<UserRole>('user')
   const [mode, setMode] = useState<AuthMode>('login')
-  const [showAdminHint, setShowAdminHint] = useState(false)
+  const [isGuestMode, setIsGuestMode] = useState(false)
   
   const [formData, setFormData] = useState({
     username: '',
@@ -38,8 +30,12 @@ export default function LoginPage() {
     setIsLoading(true)
     setError('')
 
+    if (isGuestMode) {
+      guestMode()
+      return
+    }
+
     if (mode === 'register') {
-      // 注册逻辑
       if (formData.password !== formData.confirmPassword) {
         setError('两次输入的密码不一致')
         setIsLoading(false)
@@ -62,8 +58,7 @@ export default function LoginPage() {
         })
 
         if (res.ok) {
-          const data = await res.json()
-          // 注册成功后需要调用登录接口获取真正的 access_token
+          // 注册成功后调用登录接口获取真正的 access_token
           const loginBody = new URLSearchParams()
           loginBody.append('username', formData.username)
           loginBody.append('password', formData.password)
@@ -75,13 +70,23 @@ export default function LoginPage() {
           if (loginRes.ok) {
             const loginData = await loginRes.json()
             setToken(loginData.access_token)
+            // 获取后端真实用户角色
+            const user = await fetchCurrentUser()
+            if (user) {
+              setCurrentUser(user)
+              localStorage.setItem('user_role', user.role)
+            } else {
+              setError('获取用户信息失败')
+              setIsLoading(false)
+              return
+            }
+          } else {
+            setError('自动登录失败，请手动登录')
+            setIsLoading(false)
+            return
           }
-          const user = createRegularUser(data.username || formData.username, data.email)
-          setCurrentUser(user)
-          localStorage.setItem('user_role', 'user')
           redirectToHome()
         } else {
-          // 处理非 JSON 响应
           const contentType = res.headers.get('content-type')
           if (contentType && contentType.includes('application/json')) {
             const err = await res.json()
@@ -117,21 +122,19 @@ export default function LoginPage() {
           const data = await res.json()
           setToken(data.access_token)
           
-          // 根据选择的角色创建用户
-          let user
-          if (role === 'admin') {
-            user = createAdminUser()
-            localStorage.setItem('user_role', 'admin')
+          // 获取后端真实用户角色
+          const user = await fetchCurrentUser()
+          if (user) {
+            setCurrentUser(user)
+            localStorage.setItem('user_role', user.role)
           } else {
-            user = createRegularUser(formData.username, `${formData.username}@example.com`)
-            localStorage.setItem('user_role', 'user')
+            setError('获取用户信息失败')
+            setIsLoading(false)
+            return
           }
-          user.username = formData.username
-          setCurrentUser(user)
           
           redirectToHome()
         } else {
-          // 处理非 JSON 响应
           const contentType = res.headers.get('content-type')
           if (contentType && contentType.includes('application/json')) {
             const err = await res.json()
@@ -149,7 +152,6 @@ export default function LoginPage() {
     }
   }
 
-  // 游客模式
   const guestMode = () => {
     const guest = createGuestUser()
     setCurrentUser(guest)
@@ -158,9 +160,6 @@ export default function LoginPage() {
     localStorage.setItem('user_role', 'guest')
     redirectToHome()
   }
-
-  const isAdminMode = role === 'admin'
-  const isGuestMode = role === 'guest'
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col">
@@ -177,40 +176,29 @@ export default function LoginPage() {
           className="w-full max-w-md"
         >
           <div className="bg-white rounded-2xl border border-[#E9ECEF] p-6 sm:p-8 shadow-sm">
-            {/* Role Selection */}
-            <div className="grid grid-cols-3 gap-2 mb-6">
+            {/* Mode Selection */}
+            <div className="grid grid-cols-2 gap-2 mb-6">
               <button
-                onClick={() => setRole('user')}
+                onClick={() => { setIsGuestMode(false); setMode('login') }}
                 className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
-                  role === 'user'
+                  !isGuestMode
                     ? 'border-[#4CAF50] bg-[#E8F5E9] text-[#4CAF50]'
                     : 'border-[#E9ECEF] text-[#868E96] hover:border-[#4CAF50]/50'
                 }`}
               >
                 <User className="w-5 h-5" />
-                <span className="text-xs font-medium">普通用户</span>
+                <span className="text-xs font-medium">登录 / 注册</span>
               </button>
               <button
-                onClick={() => setRole('admin')}
+                onClick={() => setIsGuestMode(true)}
                 className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
-                  role === 'admin'
-                    ? 'border-[#F44336] bg-[#FFEBEE] text-[#F44336]'
-                    : 'border-[#E9ECEF] text-[#868E96] hover:border-[#F44336]/50'
-                }`}
-              >
-                <Shield className="w-5 h-5" />
-                <span className="text-xs font-medium">管理员</span>
-              </button>
-              <button
-                onClick={() => setRole('guest')}
-                className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
-                  role === 'guest'
+                  isGuestMode
                     ? 'border-[#868E96] bg-[#F5F5F5] text-[#616161]'
                     : 'border-[#E9ECEF] text-[#868E96] hover:border-[#868E96]/50'
                 }`}
               >
                 <Crown className="w-5 h-5" />
-                <span className="text-xs font-medium">游客</span>
+                <span className="text-xs font-medium">游客访问</span>
               </button>
             </div>
 
@@ -222,11 +210,9 @@ export default function LoginPage() {
               <p className="text-[#868E96] text-sm">
                 {isGuestMode 
                   ? '游客只能浏览，不能创建或收藏菜谱' 
-                  : isAdminMode 
-                    ? '管理员登录' 
-                    : mode === 'login' 
-                      ? '普通用户登录' 
-                      : '注册成为普通用户'}
+                  : mode === 'login' 
+                    ? '登录您的账号' 
+                    : '注册成为新用户'}
               </p>
             </div>
 
@@ -255,7 +241,7 @@ export default function LoginPage() {
                     type="text"
                     value={formData.username}
                     onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    placeholder={isAdminMode ? "管理员用户名" : "请输入用户名"}
+                    placeholder="请输入用户名"
                     className="w-full px-4 py-3 bg-[#F8F9FA] border border-[#E9ECEF] rounded-lg text-[#212529] placeholder:text-[#ADB5BD] focus:border-[#4CAF50] outline-none transition-all"
                     required
                   />
@@ -270,7 +256,7 @@ export default function LoginPage() {
                       type={showPassword ? 'text' : 'password'}
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      placeholder={isAdminMode ? "管理员密码" : "请输入密码"}
+                      placeholder="请输入密码"
                       className="w-full px-4 py-3 bg-[#F8F9FA] border border-[#E9ECEF] rounded-lg text-[#212529] placeholder:text-[#ADB5BD] focus:border-[#4CAF50] outline-none transition-all pr-12"
                       required
                     />
@@ -310,9 +296,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`w-full py-3.5 text-white rounded-lg font-semibold hover:opacity-90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 ${
-                    isAdminMode ? 'bg-[#F44336] hover:bg-[#E53935]' : 'bg-[#4CAF50] hover:bg-[#43A047]'
-                  }`}
+                  className="w-full py-3.5 bg-[#4CAF50] text-white rounded-lg font-semibold hover:bg-[#43A047] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
                     <>
@@ -343,7 +327,7 @@ export default function LoginPage() {
             )}
 
             {/* Toggle Login/Register */}
-            {!isAdminMode && !isGuestMode && (
+            {!isGuestMode && (
               <div className="mt-4 text-center">
                 <button
                   onClick={() => {
@@ -354,34 +338,6 @@ export default function LoginPage() {
                 >
                   {mode === 'login' ? '没有账号？去注册' : '已有账号？去登录'}
                 </button>
-              </div>
-            )}
-
-            {/* Admin Default Hint - Collapsible */}
-            {isAdminMode && (
-              <div className="mt-4">
-                <button
-                  onClick={() => setShowAdminHint(!showAdminHint)}
-                  className="w-full flex items-center justify-center gap-1 text-xs text-[#868E96] hover:text-[#495057] transition-colors"
-                >
-                  <span>忘记管理员账号？</span>
-                  <ChevronDown className={`w-4 h-4 transition-transform ${showAdminHint ? 'rotate-180' : ''}`} />
-                </button>
-                <AnimatePresence>
-                  {showAdminHint && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="mt-2 p-3 bg-[#FFF8E1] border border-[#FFE082] rounded-lg"
-                    >
-                      <p className="text-xs text-[#F57C00]">
-                        默认账号：<span className="font-mono font-semibold">{DEFAULT_ADMIN.username}</span> / 
-                        密码：<span className="font-mono font-semibold">{DEFAULT_ADMIN.password}</span>
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
             )}
           </div>

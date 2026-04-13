@@ -56,22 +56,23 @@ export interface MealieRecipe {
   name: string
   description: string
   image: string | null
-  recipe_yield: string
-  recipe_ingredient: MealieIngredient[]
-  recipe_instructions: MealieInstruction[]
+  recipeYield: string
+  recipeIngredient: MealieIngredient[]
+  recipeInstructions: MealieInstruction[]
   tags: MealieTag[]
-  category: MealieCategory[]
-  total_time: string | null
-  prep_time: string | null
-  perform_time: string | null
+  recipeCategory: MealieCategory[]
+  totalTime: string | null
+  prepTime: string | null
+  performTime: string | null
   rating: number | null
-  org_url: string | null
-  date_added: string
-  date_updated: string
+  orgURL: string | null
+  dateAdded: string
+  dateUpdated: string
 }
 
 export interface MealieIngredient {
-  id: string
+  id?: string
+  referenceId?: string
   quantity: number
   unit: MealieUnit | null
   food: MealieFood | null
@@ -79,36 +80,36 @@ export interface MealieIngredient {
   display: string
   title: string | null
   original_text: string
-  reference_id: string
+  reference_id?: string
 }
 
 export interface MealieInstruction {
-  id: string
+  id?: string
   text: string
   ingredient_references: any[]
   title: string | null
 }
 
 export interface MealieFood {
-  id: string
+  id?: string
   name: string
-  description: string | null
+  description: string
 }
 
 export interface MealieUnit {
-  id: string
+  id?: string
   name: string
-  description: string | null
+  description: string
 }
 
 export interface MealieTag {
-  id: string
+  id?: string
   name: string
   slug: string
 }
 
 export interface MealieCategory {
-  id: string
+  id?: string
   name: string
   slug: string
 }

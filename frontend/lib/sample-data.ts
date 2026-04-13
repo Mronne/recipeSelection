@@ -1,7 +1,7 @@
 import { Recipe } from '@/types'
 export const sampleRecipes: Recipe[] = [
   {
-    id: '1', name: '红烧肉', description: '肥而不腻，入口即化的经典家常菜',
+    id: '1', slug: 'hong-shao-rou', name: '红烧肉', description: '肥而不腻，入口即化的经典家常菜',
     coverImage: '/images/recipe-1.jpg', prepTime: 20, cookTime: 60, servings: 4, difficulty: 'medium',
     ingredients: [
       { id: '1', name: '五花肉', amount: 500, unit: '克', category: 'meat' },
@@ -24,7 +24,7 @@ export const sampleRecipes: Recipe[] = [
     tags: ['中餐','家常菜','下饭菜'], category: '中餐', createdAt: '2024-01-15', updatedAt: '2024-01-15'
   },
   {
-    id: '2', name: '番茄炒蛋', description: '酸甜可口，老少皆宜的经典快手菜',
+    id: '2', slug: 'fan-qie-chao-dan', name: '番茄炒蛋', description: '酸甜可口，老少皆宜的经典快手菜',
     coverImage: '/images/recipe-2.jpg', prepTime: 10, cookTime: 10, servings: 2, difficulty: 'easy',
     ingredients: [
       { id: '1', name: '鸡蛋', amount: 3, unit: '个', category: 'eggs_dairy' },
@@ -45,7 +45,7 @@ export const sampleRecipes: Recipe[] = [
     tags: ['中餐','快手菜','家常菜','素食'], category: '中餐', createdAt: '2024-01-16', updatedAt: '2024-01-16'
   },
   {
-    id: '3', name: '枸杞红枣鸡汤', description: '滋补养生的营养汤品',
+    id: '3', slug: 'gou-qi-hong-zao-ji-tang', name: '枸杞红枣鸡汤', description: '滋补养生的营养汤品',
     coverImage: '/images/recipe-3.jpg', prepTime: 15, cookTime: 90, servings: 4, difficulty: 'easy',
     ingredients: [
       { id: '1', name: '鸡肉', amount: 500, unit: '克', category: 'meat' },
@@ -65,7 +65,7 @@ export const sampleRecipes: Recipe[] = [
     tags: ['中餐','汤羹','养生'], category: '汤羹', createdAt: '2024-01-17', updatedAt: '2024-01-17'
   },
   {
-    id: '4', name: '小笼包', description: '皮薄馅大，汤汁鲜美的传统点心',
+    id: '4', slug: 'xiao-long-bao', name: '小笼包', description: '皮薄馅大，汤汁鲜美的传统点心',
     coverImage: '/images/recipe-4.jpg', prepTime: 45, cookTime: 15, servings: 4, difficulty: 'hard',
     ingredients: [
       { id: '1', name: '面粉', amount: 300, unit: '克', category: 'staples' },
@@ -86,7 +86,7 @@ export const sampleRecipes: Recipe[] = [
     tags: ['中餐','小吃','主食'], category: '小吃', createdAt: '2024-01-18', updatedAt: '2024-01-18'
   },
   {
-    id: '5', name: '宫保鸡丁', description: '麻辣鲜香，花生酥脆的经典川菜',
+    id: '5', slug: 'gong-bao-ji-ding', name: '宫保鸡丁', description: '麻辣鲜香，花生酥脆的经典川菜',
     coverImage: '/images/recipe-5.jpg', prepTime: 20, cookTime: 15, servings: 3, difficulty: 'medium',
     ingredients: [
       { id: '1', name: '鸡胸肉', amount: 300, unit: '克', category: 'meat' },
@@ -109,7 +109,7 @@ export const sampleRecipes: Recipe[] = [
     tags: ['中餐','川菜','下饭菜'], category: '中餐', createdAt: '2024-01-19', updatedAt: '2024-01-19'
   },
   {
-    id: '6', name: '蒜蓉西兰花', description: '清爽健康的快手素菜',
+    id: '6', slug: 'suan-rong-xi-lan-hua', name: '蒜蓉西兰花', description: '清爽健康的快手素菜',
     coverImage: '/images/recipe-6.jpg', prepTime: 10, cookTime: 5, servings: 2, difficulty: 'easy',
     ingredients: [
       { id: '1', name: '西兰花', amount: 300, unit: '克', category: 'vegetables' },

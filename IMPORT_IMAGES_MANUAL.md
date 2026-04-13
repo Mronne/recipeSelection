@@ -15,11 +15,8 @@
 打开终端（Windows 用 PowerShell/CMD，Mac/Linux 用 Terminal）：
 
 ```bash
-# 下载后端镜像
+# 下载单镜像（后端 API + 前端 Web 合一）
 docker pull ghcr.io/mronne/recipeselection:main
-
-# 下载前端镜像
-docker pull ghcr.io/mronne/recipeselection-frontend:main
 
 # 查看已下载的镜像
 docker images | grep recipeselection
@@ -34,11 +31,8 @@ docker images | grep recipeselection
 mkdir -p ~/Desktop/mealie-images
 cd ~/Desktop/mealie-images
 
-# 保存后端镜像（约 500MB-1GB）
-docker save ghcr.io/mronne/recipeselection:main > mealie-backend.tar
-
-# 保存前端镜像（约 200-300MB）
-docker save ghcr.io/mronne/recipeselection-frontend:main > mealie-frontend.tar
+# 保存镜像（约 400-600MB）
+docker save ghcr.io/mronne/recipeselection:main > mealie.tar
 
 # 查看文件大小
 ls -lh *.tar
@@ -54,7 +48,7 @@ ls -lh *.tar
 
 1. 打开 **极空间客户端** → **文件管理**
 2. 创建文件夹：`/Docker/images/`
-3. 将两个 `.tar` 文件上传到该文件夹
+3. 将 `mealie.tar` 文件上传到该文件夹
 
 ### 方法 B：通过 SMB/FTP 上传（更快）
 
@@ -71,16 +65,14 @@ ls -lh *.tar
 1. 打开 **Container Station**
 2. 左侧菜单 → **镜像**
 3. 点击右上角的 **导入镜像** 按钮
-4. 选择文件：找到上传的 `mealie-backend.tar`
+4. 选择文件：找到上传的 `mealie.tar`
 5. 点击 **导入**
 6. 等待导入完成（可能需要几分钟）
-7. 重复上述步骤导入 `mealie-frontend.tar`
 
 ### 验证镜像已导入
 
 导入完成后，在 **镜像** 列表中应该能看到：
 - `ghcr.io/mronne/recipeselection:main`
-- `ghcr.io/mronne/recipeselection-frontend:main`
 
 ---
 
@@ -93,7 +85,7 @@ version: "3.8"
 
 services:
   mealie:
-    container_name: wangzhe-restaurant-api
+    container_name: wangzhe-restaurant
     # 使用已导入的镜像
     image: ghcr.io/mronne/recipeselection:main
     restart: always
@@ -101,33 +93,12 @@ services:
       - "9000:9000"
     volumes:
       - ./data/mealie-data:/app/data/
-      - ./data/mealie-images:/app/images
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Shanghai
       - ALLOW_SIGNUP=true
       - BASE_URL=http://你的极空间IP:9000
-    networks:
-      - mealie-network
-
-  frontend:
-    container_name: wangzhe-restaurant-web
-    # 使用已导入的镜像
-    image: ghcr.io/mronne/recipeselection-frontend:main
-    restart: always
-    ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://mealie:9000
-    networks:
-      - mealie-network
-    depends_on:
-      - mealie
-
-networks:
-  mealie-network:
-    driver: bridge
 ```
 
 然后按照之前的步骤使用 Container Station 的 **Compose 项目** 创建。
@@ -145,8 +116,7 @@ networks:
 ### 2. 使用 SCP 上传镜像文件
 ```bash
 # 在电脑终端执行
-scp ~/Desktop/mealie-images/mealie-backend.tar root@你的极空间IP:/tmp/
-scp ~/Desktop/mealie-images/mealie-frontend.tar root@你的极空间IP:/tmp/
+scp ~/Desktop/mealie-images/mealie.tar root@你的极空间IP:/tmp/
 ```
 
 ### 3. SSH 登录并导入
@@ -155,8 +125,7 @@ scp ~/Desktop/mealie-images/mealie-frontend.tar root@你的极空间IP:/tmp/
 ssh root@你的极空间IP
 
 # 导入镜像
-docker load -i /tmp/mealie-backend.tar
-docker load -i /tmp/mealie-frontend.tar
+docker load -i /tmp/mealie.tar
 
 # 验证
 docker images | grep recipeselection
@@ -192,7 +161,7 @@ docker-compose up -d
 
 如果无法使用 Docker 下载，可以尝试以下方式获取镜像文件：
 
-### 使用 GitHub Actions  artifact（如果有配置）
+### 使用 GitHub Actions artifact（如果有配置）
 检查 GitHub 仓库的 Actions 页面，看是否有生成镜像文件的 workflow。
 
 ### 使用第三方镜像站（如果可用）

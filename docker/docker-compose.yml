@@ -10,7 +10,7 @@ services:
     volumes:
       - mealie-data:/app/data/
     ports:
-      - 9091:9000
+      - 8080:9000
     environment:
       ALLOW_SIGNUP: "true"
       LOG_LEVEL: "DEBUG"

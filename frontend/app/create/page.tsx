@@ -84,6 +84,10 @@ export default function CreateRecipe() {
     console.log('handleSubmit: 开始创建菜谱', recipe)
     console.log('handleSubmit: 图片文件', imageFile)
     
+    // 调试：打印实际发送到后端的数据
+    const { toBackendRecipe } = await import('@/lib/adapters')
+    console.log('handleSubmit: 后端数据', toBackendRecipe(recipe))
+    
     const result = await create(recipe)
     console.log('handleSubmit: 创建结果', result)
     

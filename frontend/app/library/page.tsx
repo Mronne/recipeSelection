@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Clock, ChefHat, Plus } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useRecipes } from '@/hooks/useRecipes'
@@ -38,8 +39,19 @@ export default function LibraryPage() {
                 >
                   <Link href={`/recipe/${recipe.id}`}>
                     <div className="bg-white rounded-xl border border-[#E9ECEF] overflow-hidden hover:border-[#4CAF50]">
-                      <div className="relative aspect-[4/3] bg-[#F1F3F5] flex items-center justify-center">
-                        <ChefHat className="w-12 h-12 text-[#ADB5BD]" />
+                      <div className="relative aspect-[4/3] bg-[#F1F3F5] overflow-hidden">
+                        {recipe.coverImage ? (
+                          <Image
+                            src={recipe.coverImage}
+                            alt={recipe.name}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <ChefHat className="w-12 h-12 text-[#ADB5BD]" />
+                          </div>
+                        )}
                         <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold"
                           style={{ backgroundColor: `${getDifficultyColor(recipe.difficulty)}20`, color: getDifficultyColor(recipe.difficulty) }}>
                           {getDifficultyLabel(recipe.difficulty)}

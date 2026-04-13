@@ -1,17 +1,16 @@
-name: Build and Push to Docker Hub (ARM64 for ZSpace)
+name: Build and Push to Docker Hub (Multi-Arch)
 
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:  # 允许手动触发
+    tags: [ 'v*' ]
+  workflow_dispatch:
 
 env:
-  # Docker Hub 镜像名
-  BACKEND_IMAGE: mronne/wangzhe-restaurant
-  FRONTEND_IMAGE: mronne/wangzhe-restaurant-frontend
+  IMAGE_NAME: mronne/wangzhe-restaurant
 
 jobs:
-  build-and-push-backend:
+  build-and-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,7 +22,7 @@ jobs:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
       with:
-        platforms: linux/arm64
+        platforms: linux/amd64,linux/arm64
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -38,20 +37,22 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.BACKEND_IMAGE }}
+        images: ${{ env.IMAGE_NAME }}
         tags: |
           type=ref,event=branch
           type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
           type=sha
           latest
 
-    - name: Build and push backend
+    - name: Build and push multi-arch image
+      id: build-and-push
       uses: docker/build-push-action@v5
       with:
         context: .
         file: ./docker/Dockerfile
         target: production
-        platforms: linux/arm64
+        platforms: linux/amd64,linux/arm64
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
@@ -60,63 +61,14 @@ jobs:
 
     - name: Output image info
       run: |
-        echo "Backend image pushed:"
-        echo "  ${{ env.BACKEND_IMAGE }}:latest"
-        echo "  ${{ env.BACKEND_IMAGE }}:${{ github.sha }}"
-
-  build-and-push-frontend:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
-      with:
-        platforms: linux/arm64
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.FRONTEND_IMAGE }}
-        tags: |
-          type=ref,event=branch
-          type=semver,pattern={{version}}
-          type=sha
-          latest
-
-    - name: Build and push frontend
-      uses: docker/build-push-action@v5
-      with:
-        context: ./frontend
-        platforms: linux/arm64
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-    - name: Output image info
-      run: |
-        echo "Frontend image pushed:"
-        echo "  ${{ env.FRONTEND_IMAGE }}:latest"
-        echo "  ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}"
+        echo "Multi-arch image pushed:"
+        echo "  ${{ env.IMAGE_NAME }}:latest"
+        echo "  ${{ env.IMAGE_NAME }}:${{ github.sha }}"
+        echo ""
+        echo "Supported platforms: linux/amd64, linux/arm64"
 
   create-deployment-guide:
-    needs: [build-and-push-backend, build-and-push-frontend]
+    needs: [build-and-push]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -129,46 +81,26 @@ jobs:
         cat > deployment/docker-compose.yml << 'EOF'
         # ==========================================
         # 极空间 Z2 PRO 部署配置 (Docker Hub 版本)
-        # 架构: ARM64 (linux/arm64)
+        # 架构: linux/amd64 + linux/arm64 多架构
         # ==========================================
         
         version: "3.8"
         
         services:
           mealie:
-            container_name: wangzhe-restaurant-api
+            container_name: wangzhe-restaurant
             image: mronne/wangzhe-restaurant:latest
             restart: always
             ports:
               - "9000:9000"
             volumes:
               - ./data/mealie-data:/app/data/
-              - ./data/mealie-images:/app/images
             environment:
               - PUID=1000
               - PGID=1000
               - TZ=Asia/Shanghai
               - ALLOW_SIGNUP=true
               - BASE_URL=http://你的极空间IP:9000
-            networks:
-              - mealie-network
-        
-          frontend:
-            container_name: wangzhe-restaurant-web
-            image: mronne/wangzhe-restaurant-frontend:latest
-            restart: always
-            ports:
-              - "3000:3000"
-            environment:
-              - NEXT_PUBLIC_API_URL=http://mealie:9000
-            networks:
-              - mealie-network
-            depends_on:
-              - mealie
-        
-        networks:
-          mealie-network:
-            driver: bridge
         EOF
         
         cat > deployment/README.txt << 'EOF'
@@ -176,8 +108,11 @@ jobs:
         ================================================
         
         镜像地址:
-          - 后端: docker.io/mronne/wangzhe-restaurant:latest
-          - 前端: docker.io/mronne/wangzhe-restaurant-frontend:latest
+          - 单镜像: docker.io/mronne/wangzhe-restaurant:latest
+          
+        说明:
+          这是一个后端+前端合一的单镜像，FastAPI 直接托管 Next.js 静态页面。
+          无需单独部署前端容器。
         
         部署步骤:
           1. 将 docker-compose.yml 上传到极空间
@@ -185,11 +120,9 @@ jobs:
           3. 在 Container Station 中使用 Compose 项目部署
         
         访问地址:
-          - 前端: http://极空间IP:3000
-          - 后端: http://极空间IP:9000
+          - http://极空间IP:9000
         EOF
         
-        # 打包
         cd deployment
         zip -r ../zspace-dockerhub-deployment.zip .
         cd ..

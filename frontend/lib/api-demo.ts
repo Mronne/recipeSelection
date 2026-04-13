@@ -4,6 +4,7 @@ import { Recipe, RecipeCreate, User } from '@/types'
 const DEMO_RECIPES: Recipe[] = [
   {
     id: '1',
+    slug: 'hong-shao-rou',
     name: '红烧肉',
     description: '肥而不腻，入口即化的经典家常菜',
     coverImage: '',
@@ -34,6 +35,7 @@ const DEMO_RECIPES: Recipe[] = [
   },
   {
     id: '2',
+    slug: 'fan-qie-chao-dan',
     name: '番茄炒蛋',
     description: '酸甜可口，老少皆宜的经典快手菜',
     coverImage: '',
@@ -62,6 +64,7 @@ const DEMO_RECIPES: Recipe[] = [
   },
   {
     id: '3',
+    slug: 'suan-rong-xi-lan-hua',
     name: '蒜蓉西兰花',
     description: '清爽健康的快手素菜',
     coverImage: '',

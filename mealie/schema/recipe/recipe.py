@@ -109,10 +109,6 @@ class CreateRecipeByUrlBulk(BaseModel):
     imports: list[CreateRecipeBulk]
 
 
-class CreateRecipe(MealieModel):
-    name: str
-
-
 class RecipeSummary(MealieModel):
     id: UUID4 | None = None
     _normalize_search: ClassVar[bool] = True
@@ -389,5 +385,17 @@ class RecipeLastMade(BaseModel):
 
 from mealie.schema.recipe.recipe_ingredient import RecipeIngredient  # noqa: E402
 
+
+class CreateRecipe(RecipeSummary):
+    """创建菜谱的请求数据模型，继承 RecipeSummary 以支持完整的菜谱数据"""
+    recipe_ingredient: Annotated[list[RecipeIngredient], Field(validate_default=True)] = []
+    recipe_instructions: list[RecipeStep] | None = []
+    nutrition: Nutrition | None = None
+    settings: RecipeSettings | None = None
+    assets: list[RecipeAsset] | None = []
+    notes: list[RecipeNote] | None = []
+
+
 RecipeSummary.model_rebuild()
 Recipe.model_rebuild()
+CreateRecipe.model_rebuild()

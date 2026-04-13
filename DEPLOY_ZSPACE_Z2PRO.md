@@ -3,7 +3,7 @@
 ## 环境信息
 - **设备**: 极空间 Z2 PRO
 - **架构**: ARM64 (linux/arm64)
-- **镜像**: 已构建完成，支持 ARM64
+- **镜像**: 单镜像部署（后端 API + 前端 Web 合一）
 
 ---
 
@@ -24,16 +24,14 @@
 version: "3.8"
 
 services:
-  # 后端 API 服务
   mealie:
-    container_name: wangzhe-restaurant-api
+    container_name: wangzhe-restaurant
     image: ghcr.io/mronne/recipeselection:main
     restart: always
     ports:
       - "9000:9000"
     volumes:
       - ./data/mealie-data:/app/data/
-      - ./data/mealie-images:/app/images
     environment:
       - PUID=1000
       - PGID=1000
@@ -42,27 +40,6 @@ services:
       - LOG_LEVEL=info
       - BASE_URL=http://你的极空间IP:9000
       - DB_ENGINE=sqlite
-    networks:
-      - mealie-network
-
-  # 前端 Web 服务
-  frontend:
-    container_name: wangzhe-restaurant-web
-    image: ghcr.io/mronne/recipeselection-frontend:main
-    restart: always
-    ports:
-      - "3000:3000"
-    environment:
-      # 后端 API 地址（使用 Docker 内部网络）
-      - NEXT_PUBLIC_API_URL=http://mealie:9000
-    networks:
-      - mealie-network
-    depends_on:
-      - mealie
-
-networks:
-  mealie-network:
-    driver: bridge
 ```
 
 **说明**：将 `你的极空间IP` 替换为实际的 IP 地址，如 `192.168.1.100`
@@ -101,48 +78,16 @@ networks:
 
 ### 步骤 5: 验证部署
 
-1. 在 Container Station → **容器** 中查看：
-   - `wangzhe-restaurant-api` (后端)
-   - `wangzhe-restaurant-web` (前端)
-2. 确认两个容器都显示为 **运行中** (绿色)
+1. 在 Container Station → **容器** 中查看 `wangzhe-restaurant`
+2. 确认容器显示为 **运行中** (绿色)
 
 ### 步骤 6: 访问应用
 
-- **前端界面**: `http://你的极空间IP:3000`
-- **后端 API**: `http://你的极空间IP:9000`
+- **应用地址**: `http://你的极空间IP:9000`
 
 ---
 
-## 方案二：使用极空间自带模板（简化版）
-
-如果只想要后端（不带独立前端）：
-
-```yaml
-version: "3.8"
-
-services:
-  mealie:
-    container_name: wangzhe-restaurant
-    image: ghcr.io/mronne/recipeselection:main
-    restart: always
-    ports:
-      - "9000:9000"
-    volumes:
-      - ./data:/app/data/
-      - ./images:/app/images
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Asia/Shanghai
-      - ALLOW_SIGNUP=true
-      - BASE_URL=http://你的极空间IP:9000
-```
-
-访问地址：`http://你的极空间IP:9000`
-
----
-
-## 方案三：使用 Portainer 管理（可选）
+## 方案二：使用 Portainer 管理（可选）
 
 如果你已经在极空间安装了 Portainer：
 
@@ -160,7 +105,7 @@ services:
 **解决**: 极空间可能无法直接访问 ghcr.io，可以尝试：
 - 等待重试（有时网络会恢复）
 - 使用代理（在 Container Station 设置中配置）
-- 手动导入镜像（见下方）
+- 手动导入镜像（见 `IMPORT_IMAGES_MANUAL.md`）
 
 ### Q2: 如何手动导入镜像
 如果自动拉取失败，可以在电脑上先下载镜像再导入：
@@ -168,11 +113,9 @@ services:
 ```bash
 # 在电脑上下载镜像
 docker pull ghcr.io/mronne/recipeselection:main
-docker pull ghcr.io/mronne/recipeselection-frontend:main
 
 # 保存为文件
-docker save ghcr.io/mronne/recipeselection:main > mealie-backend.tar
-docker save ghcr.io/mronne/recipeselection-frontend:main > mealie-frontend.tar
+docker save ghcr.io/mronne/recipeselection:main > mealie.tar
 
 # 上传到极空间，然后在 Container Station 中导入
 ```
@@ -192,7 +135,6 @@ docker-compose up -d
 ### Q4: 数据备份
 定期备份以下目录：
 - `./data/mealie-data/` - 数据库和配置
-- `./data/mealie-images/` - 上传的图片
 
 ---
 
@@ -200,5 +142,4 @@ docker-compose up -d
 
 请提供以下信息，我可以帮你生成个性化的配置文件：
 1. 你的极空间 IP 地址（如：192.168.1.100）
-2. 是否需要前端独立部署（还是只用后端）
-3. 数据存储路径偏好
+2. 数据存储路径偏好

@@ -292,8 +292,8 @@ class ApiClient {
 
   // 获取食谱图片完整 URL（用于直接显示）
   getRecipeImageUrl(recipeId: string, cacheKey?: string): string {
-    // 使用完整后端地址，Mealie 图片路由在 /api/media/recipes/{id}/images/
-    const url = `${BACKEND_URL}/api/media/recipes/${recipeId}/images/original.webp`
+    // 单镜像部署下使用相对路径
+    const url = `/api/media/recipes/${recipeId}/images/original.webp`
     return cacheKey ? `${url}?c=${cacheKey}` : url
   }
 }

@@ -191,7 +191,9 @@ class RecipeService(RecipeServiceBase):
         if create_data.name is None:
             create_data.name = "New Recipe"
 
-        data: Recipe = self._recipe_creation_factory(name=create_data.name, additional_attrs=create_data.model_dump())
+        # Clean and process recipe data (handles ingredients food/unit creation)
+        cleaned_data = self.clean_recipe_dict(create_data.model_dump())
+        data: Recipe = self._recipe_creation_factory(name=create_data.name, additional_attrs=cleaned_data)
 
         if isinstance(create_data, CreateRecipe) or create_data.settings is None:
             if self.household.preferences is not None:
@@ -254,6 +256,60 @@ class RecipeService(RecipeServiceBase):
         new_item = repo.create(data)
         return new_item.model_dump()
 
+    def _transform_ingredient_food(self, data: dict) -> dict:
+        """Transform ingredient food data, creating new food if it doesn't exist."""
+        if not data or not isinstance(data, dict):
+            return data
+
+        name = data.get("name")
+        if not name:
+            return data
+
+        # try to find existing food by name
+        from mealie.schema.recipe.recipe_ingredient import CreateIngredientFood
+        foods = self.repos.ingredient_foods.get_all()
+        existing = None
+        for food in foods:
+            if food.name.lower() == name.lower():
+                existing = food
+                break
+
+        if existing:
+            return existing.model_dump()
+
+        # create new food
+        from mealie.schema.recipe.recipe_ingredient import SaveIngredientFood
+        new_food_data = SaveIngredientFood(name=name, description=data.get("description", ""), group_id=self.user.group_id)
+        new_food = self.repos.ingredient_foods.create(new_food_data)
+        return new_food.model_dump()
+
+    def _transform_ingredient_unit(self, data: dict) -> dict:
+        """Transform ingredient unit data, creating new unit if it doesn't exist."""
+        if not data or not isinstance(data, dict):
+            return data
+
+        name = data.get("name")
+        if not name:
+            return data
+
+        # try to find existing unit by name
+        from mealie.schema.recipe.recipe_ingredient import CreateIngredientUnit
+        units = self.repos.ingredient_units.get_all()
+        existing = None
+        for unit in units:
+            if unit.name.lower() == name.lower():
+                existing = unit
+                break
+
+        if existing:
+            return existing.model_dump()
+
+        # create new unit
+        from mealie.schema.recipe.recipe_ingredient import SaveIngredientUnit
+        new_unit_data = SaveIngredientUnit(name=name, description=data.get("description", ""), group_id=self.user.group_id)
+        new_unit = self.repos.ingredient_units.create(new_unit_data)
+        return new_unit.model_dump()
+
     def _process_recipe_data(self, key: str, data: list | dict | Any):
         if isinstance(data, list):
             return [self._process_recipe_data(key, item) for item in data]
@@ -277,6 +333,12 @@ class RecipeService(RecipeServiceBase):
             return self._transform_category_or_tag(data, self.repos.categories)
         elif key == "tags":
             return self._transform_category_or_tag(data, self.repos.tags)
+
+        # handle ingredient food and unit
+        if key == "food":
+            return self._transform_ingredient_food(data)
+        elif key == "unit":
+            return self._transform_ingredient_unit(data)
 
         # recursively process other objects
         for k, v in data.items():

@@ -164,8 +164,8 @@ export function fromBackendUnit(backendUnit: string): string {
  * 后端食谱数据 -> 前端格式
  */
 export function fromBackendRecipe(backend: MealieRecipe): Recipe {
-  const totalMinutes = parseTime(backend.total_time) || 
-    (parseTime(backend.prep_time) || 0) + (parseTime(backend.perform_time) || 0)
+  const totalMinutes = parseTime(backend.totalTime) || 
+    (parseTime(backend.prepTime) || 0) + (parseTime(backend.performTime) || 0)
   
   return {
     id: backend.id,
@@ -173,23 +173,23 @@ export function fromBackendRecipe(backend: MealieRecipe): Recipe {
     name: backend.name,
     description: backend.description || '',
     coverImage: backend.id 
-      ? `http://localhost:9000/api/media/recipes/${backend.id}/images/original.webp${backend.image ? '?c=' + backend.image : ''}`
+      ? `/api/media/recipes/${backend.id}/images/original.webp${backend.image ? '?c=' + backend.image : ''}`
       : '/images/recipe-placeholder.svg',
-    prepTime: parseTime(backend.prep_time) || 0,
-    cookTime: parseTime(backend.perform_time) || 0,
-    servings: parseServings(backend.recipe_yield) || 2,
+    prepTime: parseTime(backend.prepTime) || 0,
+    cookTime: parseTime(backend.performTime) || 0,
+    servings: parseServings(backend.recipeYield) || 2,
     difficulty: inferDifficulty(totalMinutes) || 'medium',
-    ingredients: (backend.recipe_ingredient || []).map(fromBackendIngredientItem),
-    steps: (backend.recipe_instructions || []).map((inst, index) => ({
+    ingredients: (backend.recipeIngredient || []).map(fromBackendIngredientItem),
+    steps: (backend.recipeInstructions || []).map((inst, index) => ({
       id: inst.id || String(index + 1),
       order: index + 1,
       description: inst.text,
       image: undefined,
     })),
     tags: (backend.tags || []).map(t => fromBackendCategory(t.name)),
-    category: (backend.category?.[0]?.name) || '中餐',
-    createdAt: backend.date_added,
-    updatedAt: backend.date_updated,
+    category: (backend.recipeCategory?.[0]?.name) || '中餐',
+    createdAt: backend.dateAdded,
+    updatedAt: backend.dateUpdated,
   }
 }
 
@@ -200,18 +200,17 @@ export function toBackendRecipe(frontend: RecipeCreate): Partial<MealieRecipe> {
   return {
     name: frontend.name,
     description: frontend.description,
-    recipe_yield: `${frontend.servings} 人份`,
-    prep_time: formatTime(frontend.prepTime),
-    perform_time: formatTime(frontend.cookTime),
-    recipe_ingredient: frontend.ingredients.map(toBackendIngredientItem),
-    recipe_instructions: frontend.steps.map((step, index) => ({
-      id: '',
+    recipeYield: `${frontend.servings} 人份`,
+    prepTime: formatTime(frontend.prepTime),
+    performTime: formatTime(frontend.cookTime),
+    recipeIngredient: frontend.ingredients.map(toBackendIngredientItem),
+    recipeInstructions: frontend.steps.map((step) => ({
       text: step.description,
       title: null,
       ingredient_references: [],
     })),
-    tags: frontend.tags.map(name => ({ id: '', name, slug: '' })),
-    category: frontend.category ? [{ id: '', name: frontend.category, slug: '' }] : [],
+    tags: frontend.tags.map(name => ({ name, slug: '' })),
+    recipeCategory: frontend.category ? [{ name: frontend.category, slug: '' }] : [],
   }
 }
 
@@ -223,7 +222,7 @@ function fromBackendIngredientItem(ing: MealieIngredient): Ingredient {
   const unitName = ing.unit?.name || ''
   
   return {
-    id: ing.id,
+    id: ing.referenceId || ing.id || '',
     name: fromBackendIngredient(foodName),
     amount: ing.quantity || 0,
     unit: fromBackendUnit(unitName),
@@ -236,16 +235,14 @@ function fromBackendIngredientItem(ing: MealieIngredient): Ingredient {
  */
 function toBackendIngredientItem(ing: Omit<Ingredient, 'id'>): MealieIngredient {
   return {
-    id: '',
     quantity: ing.amount,
-    unit: { id: '', name: toBackendUnit(ing.unit), description: null },
-    food: { id: '', name: toBackendIngredient(ing.name), description: null },
+    unit: { name: toBackendUnit(ing.unit), description: '' },
+    food: { name: toBackendIngredient(ing.name), description: '' },
     note: ing.name,
     display: `${ing.amount}${ing.unit} ${ing.name}`,
     title: null,
     original_text: `${ing.amount}${ing.unit}${ing.name}`,
-    reference_id: '',
-  }
+  } as MealieIngredient
 }
 
 // ==================== 辅助函数 ====================

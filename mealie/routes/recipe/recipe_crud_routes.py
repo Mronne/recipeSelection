@@ -420,8 +420,8 @@ class RecipeController(BaseRecipeController):
 
         return recipe
 
-    @router.post("", status_code=201, response_model=str)
-    def create_one(self, data: CreateRecipe) -> str | None:
+    @router.post("", status_code=201, response_model=Recipe)
+    def create_one(self, data: CreateRecipe) -> Recipe | None:
         """Takes in a JSON string and loads data into the database as a new entry"""
         try:
             new_recipe = self.service.create_one(data)
@@ -442,7 +442,7 @@ class RecipeController(BaseRecipeController):
                 ),
             )
 
-        return new_recipe.slug
+        return new_recipe
 
     @router.post("/{slug}/duplicate", status_code=201, response_model=Recipe)
     def duplicate_one(self, slug: str, req: RecipeDuplicate) -> Recipe:

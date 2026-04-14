@@ -1,5 +1,5 @@
 ###############################################
-# Multi-Arch Optimized Dockerfile
+# ARM64 Optimized Dockerfile
 # frontend-builder & backend-builder use BUILDPLATFORM
 # for fast native compilation on CI runners
 ###############################################
@@ -17,7 +17,7 @@ WORKDIR /frontend
 COPY frontend/package*.json ./
 
 # Install dependencies
-RUN npm install --prefer-offline --no-audit --no-fund
+RUN npm ci --prefer-offline --no-audit --no-fund
 
 # Copy frontend source
 COPY frontend .
@@ -32,8 +32,7 @@ RUN npm run build
 FROM --platform=$BUILDPLATFORM python:3.12-slim AS backend-builder
 
 RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
-    curl \
+    && apt-get install --no-install-recommends -y curl \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install uv
@@ -46,13 +45,10 @@ COPY mealie ./mealie
 # Build the source and binary package
 RUN uv build --out-dir dist
 
-# Create the requirements file
+# Create the requirements file (no hashes for faster build)
 RUN uv export --no-editable --no-emit-project --extra pgsql --format requirements-txt --output-file dist/requirements.txt \
     && MEALIE_VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])") \
-    && printf 'mealie[pgsql]==%s \\\n' "$MEALIE_VERSION" >> dist/requirements.txt \
-    && pip hash dist/mealie-${MEALIE_VERSION}-py3-none-any.whl | tail -n1 | tr -d '\n' >> dist/requirements.txt \
-    && printf ' \\\n' >> dist/requirements.txt \
-    && pip hash dist/mealie-${MEALIE_VERSION}.tar.gz | tail -n1 >> dist/requirements.txt
+    && printf 'mealie[pgsql]==%s\n' "$MEALIE_VERSION" >> dist/requirements.txt
 
 ###############################################
 # Package Container
@@ -88,19 +84,18 @@ RUN apt-get update \
     && apt-get install --no-install-recommends -y \
     build-essential \
     libpq-dev \
-    libwebp-dev \
-    ffmpeg \
     libsasl2-dev libldap2-dev libssl-dev \
-    gnupg gnupg2 gnupg1 \
     && rm -rf /var/lib/apt/lists/*
-RUN python3 -m venv --upgrade-deps $VENV_PATH
+
+RUN python3 -m venv --upgrade-deps $VENV_PATH \
+    && pip install uv
 
 FROM venv-builder-base AS venv-builder
 
 COPY --from=packages * /dist/
 
 RUN . $VENV_PATH/bin/activate \
-    && pip install --require-hashes -r /dist/requirements.txt --find-links /dist
+    && uv pip install -r /dist/requirements.txt --find-links /dist
 
 ###############################################
 # Production Image (Backend + Frontend)
@@ -127,8 +122,9 @@ RUN mkdir -p /run/secrets
 COPY --from=venv-builder $VENV_PATH $VENV_PATH
 
 ENV NLTK_DATA="/nltk_data/"
-RUN mkdir -p $NLTK_DATA
-RUN python -m nltk.downloader -q -d $NLTK_DATA averaged_perceptron_tagger_eng || echo "Warning: nltk data download failed, continuing build"
+RUN mkdir -p $NLTK_DATA \
+    && python -m nltk.downloader -q -d $NLTK_DATA averaged_perceptron_tagger_eng \
+    || echo "Warning: nltk data download failed, continuing build"
 
 # Copy frontend static files to be served by backend SPA
 COPY --from=frontend-builder /frontend/dist /app/mealie/frontend
@@ -145,8 +141,6 @@ HEALTHCHECK CMD $MEALIE_HOME/healthcheck.sh
 
 ENV HOST=0.0.0.0
 
-EXPOSE ${APP_PORT}
 COPY ./docker/entry.sh $MEALIE_HOME/run.sh
-
 RUN chmod +x $MEALIE_HOME/run.sh
 ENTRYPOINT ["/app/run.sh"]

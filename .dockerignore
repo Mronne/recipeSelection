@@ -1,0 +1,67 @@
+# Frontend
+frontend/node_modules
+frontend/.next
+frontend/dist
+frontend/out
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnpm-debug.log*
+frontend/coverage
+frontend/.turbo
+frontend/tsconfig.tsbuildinfo
+
+# Backend / Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv
+venv
+env
+ENV
+env.bak
+venv.bak
+*.egg-info
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov
+.tox
+.nox
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Git
+.git
+.gitignore
+
+# CI / Deployment
+.github/workflows/disabled
+.github/actions
+
+# Docker
+docker/*.tar.gz
+docker/*.zip
+
+# Data / Logs
+data
+logs
+*.log
+*.sqlite
+*.db
+
+# OS
+.DS_Store
+Thumbs.db

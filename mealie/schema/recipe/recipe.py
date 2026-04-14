@@ -46,13 +46,11 @@ def create_recipe_slug(name: str, max_length: int = 250) -> str:
 
     Returns:
         A truncated slug string
-
-    Raises:
-        ValueError: If the name cannot be converted to a valid slug
     """
     generated_slug = slugify(name)
     if not generated_slug:
-        raise SlugError("Recipe name cannot be empty or contain only special characters")
+        # Fallback for CJK characters when text-unidecode is used instead of unidecode
+        generated_slug = uuid4().hex[:12]
     if len(generated_slug) > max_length:
         generated_slug = generated_slug[:max_length]
     return generated_slug

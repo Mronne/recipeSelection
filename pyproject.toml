@@ -49,6 +49,7 @@ dependencies = [
     "ingredient-parser-nlp==2.6.0",
     "pint==0.25.3",
     "httpx-curl-cffi==0.1.5",
+    "unidecode==1.4.0",
 ]
 
 [project.scripts]

@@ -138,9 +138,12 @@ jobs:
     needs: [build-and-push]
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
 
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
       with:
@@ -165,3 +168,15 @@ jobs:
         name: mealie-arm64-image
         path: mealie-arm64.tar.gz
         retention-days: 30
+
+    - name: Upload to GitHub Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release delete nightly-arm64 --yes || true
+        git tag -f nightly-arm64 ${{ github.sha }}
+        git push -f origin nightly-arm64
+        gh release create nightly-arm64 mealie-arm64.tar.gz \
+          --title "ARM64 Nightly Build" \
+          --notes "Auto-generated ARM64 image for NAS deployment." \
+          --target ${{ github.sha }}

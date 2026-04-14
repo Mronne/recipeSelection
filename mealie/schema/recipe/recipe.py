@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Annotated, Any, ClassVar
 from uuid import uuid4
 
-from pydantic import UUID4, BaseModel, ConfigDict, Field, field_validator
+from pydantic import UUID4, BaseModel, ConfigDict, Field, field_validator, model_validator
 from pydantic_core.core_schema import ValidationInfo
 from slugify import slugify
 from sqlalchemy import Select, desc, func, or_, select, text
@@ -155,6 +155,24 @@ class RecipeSummary(MealieModel):
 
         return val
 
+    @field_validator("slug", mode="before")
+    def validate_slug(slug: str, info: ValidationInfo):
+        if slug or not info.data.get("name"):
+            return slug
+        return create_recipe_slug(info.data["name"])
+
+    @field_validator("tags", mode="before")
+    def validate_tags(cats: list[Any]):
+        if isinstance(cats, list) and cats and isinstance(cats[0], str):
+            return [RecipeTag(id=uuid4(), name=c, slug=create_recipe_slug(c)) for c in cats]
+        return cats
+
+    @field_validator("recipe_category", mode="before")
+    def validate_categories(cats: list[Any]):
+        if isinstance(cats, list) and cats and isinstance(cats[0], str):
+            return [RecipeCategory(id=uuid4(), name=c, slug=create_recipe_slug(c)) for c in cats]
+        return cats
+
     @property
     def recipe_yield_display(self) -> str:
         return f"{self.recipe_yield_quantity} {self.recipe_yield}".strip()
@@ -232,13 +250,6 @@ class Recipe(RecipeSummary):
 
     model_config = ConfigDict(from_attributes=True)
 
-    @field_validator("slug", mode="before")
-    def validate_slug(slug: str, info: ValidationInfo):
-        if slug or not info.data.get("name"):
-            return slug
-
-        return create_recipe_slug(info.data["name"])
-
     @field_validator("recipe_ingredient", mode="before")
     def validate_ingredients(recipe_ingredient):
         if not recipe_ingredient or not isinstance(recipe_ingredient, list):
@@ -248,18 +259,6 @@ class Recipe(RecipeSummary):
             return [RecipeIngredient(note=x) for x in recipe_ingredient]
 
         return recipe_ingredient
-
-    @field_validator("tags", mode="before")
-    def validate_tags(cats: list[Any]):
-        if isinstance(cats, list) and cats and isinstance(cats[0], str):
-            return [RecipeTag(id=uuid4(), name=c, slug=create_recipe_slug(c)) for c in cats]
-        return cats
-
-    @field_validator("recipe_category", mode="before")
-    def validate_categories(cats: list[Any]):
-        if isinstance(cats, list) and cats and isinstance(cats[0], str):
-            return [RecipeCategory(id=uuid4(), name=c, slug=create_recipe_slug(c)) for c in cats]
-        return cats
 
     @field_validator("group_id", mode="before")
     def validate_group_id(group_id: Any):

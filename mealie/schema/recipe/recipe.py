@@ -252,13 +252,13 @@ class Recipe(RecipeSummary):
     @field_validator("tags", mode="before")
     def validate_tags(cats: list[Any]):
         if isinstance(cats, list) and cats and isinstance(cats[0], str):
-            return [RecipeTag(id=uuid4(), name=c, slug=slugify(c)) for c in cats]
+            return [RecipeTag(id=uuid4(), name=c, slug=create_recipe_slug(c)) for c in cats]
         return cats
 
     @field_validator("recipe_category", mode="before")
     def validate_categories(cats: list[Any]):
         if isinstance(cats, list) and cats and isinstance(cats[0], str):
-            return [RecipeCategory(id=uuid4(), name=c, slug=slugify(c)) for c in cats]
+            return [RecipeCategory(id=uuid4(), name=c, slug=create_recipe_slug(c)) for c in cats]
         return cats
 
     @field_validator("group_id", mode="before")

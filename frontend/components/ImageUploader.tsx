@@ -8,12 +8,52 @@ interface ImageUploaderProps {
   onChange?: (url: string, file?: File) => void
 }
 
+function resizeImage(file: File, maxWidth = 1200, maxHeight = 1200, quality = 0.85): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.src = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(img.src)
+      let { width, height } = img
+      if (width > maxWidth || height > maxHeight) {
+        const ratio = Math.min(maxWidth / width, maxHeight / height)
+        width = Math.round(width * ratio)
+        height = Math.round(height * ratio)
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        reject(new Error('Canvas not supported'))
+        return
+      }
+      ctx.drawImage(img, 0, 0, width, height)
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error('Canvas toBlob failed'))
+            return
+          }
+          const resizedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.jpg'), {
+            type: 'image/jpeg',
+            lastModified: Date.now(),
+          })
+          resolve(resizedFile)
+        },
+        'image/jpeg',
+        quality
+      )
+    }
+    img.onerror = () => reject(new Error('Image load failed'))
+  })
+}
+
 export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState<string | null>(value || null)
   const [isLoading, setIsLoading] = useState(false)
 
-  // 当外部 value 变化时更新 preview
   useEffect(() => {
     if (value) {
       setPreview(value)
@@ -24,26 +64,24 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
     inputRef.current?.click()
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // 检查文件大小 (限制 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('图片大小不能超过 5MB')
+    setIsLoading(true)
+    try {
+      const resized = await resizeImage(file)
+      const url = URL.createObjectURL(resized)
+      setPreview(url)
+      onChange?.(url, resized)
+    } catch (err) {
+      alert('图片处理失败，请重试')
       if (inputRef.current) {
         inputRef.current.value = ''
       }
-      return
+    } finally {
+      setIsLoading(false)
     }
-
-    setIsLoading(true)
-    
-    // 创建本地预览URL
-    const url = URL.createObjectURL(file)
-    setPreview(url)
-    setIsLoading(false)
-    onChange?.(url, file)
   }
 
   const handleRemove = (e: React.MouseEvent) => {
@@ -71,7 +109,7 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
       {isLoading ? (
         <div className="flex flex-col items-center">
           <div className="w-10 h-10 border-4 border-[#4CAF50] border-t-transparent rounded-full animate-spin mb-2" />
-          <span className="text-sm text-[#868E96]">加载中...</span>
+          <span className="text-sm text-[#868E96]">处理中...</span>
         </div>
       ) : preview ? (
         <>
@@ -98,7 +136,7 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
             点击上传图片
           </span>
           <span className="text-xs text-[#ADB5BD] mt-1">
-            最大 5MB
+            自动压缩，建议上传高清原图
           </span>
         </>
       )}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Search, Plus, Clock, ChefHat } from 'lucide-react'
 import Link from 'next/link'
@@ -19,6 +20,7 @@ const isGuestUser = () => {
 }
 
 export default function Home() {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState('全部')
   const [greeting, setGreeting] = useState('你好')
@@ -30,13 +32,20 @@ export default function Home() {
   })
 
   useEffect(() => {
+    // 静态导出下 middleware 不生效，手动检查登录状态
+    const token = localStorage.getItem('mealie_token')
+    if (!token && !isGuestUser()) {
+      router.replace('/login')
+      return
+    }
+
     const hour = new Date().getHours()
     if (hour < 12) setGreeting('早上好')
     else if (hour < 18) setGreeting('下午好')
     else setGreeting('晚上好')
     
     setIsGuest(isGuestUser())
-  }, [])
+  }, [router])
 
   return (
     <div className="min-h-screen bg-[#F8F9FA]">

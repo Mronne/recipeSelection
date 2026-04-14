@@ -45,11 +45,20 @@ class ApiClient {
     // 响应拦截器 - 错误处理
     this.client.interceptors.response.use(
       (response) => response,
-      (error: AxiosError<{ detail?: string; message?: string }>) => {
+      (error: AxiosError<{ detail?: any; message?: string }>) => {
         if (error.response?.data) {
           const data = error.response.data
-          const detail = data.detail || data.message || JSON.stringify(data)
-          ;(error as any).displayMessage = `${error.message}: ${detail}`
+          let detailText = ''
+          if (Array.isArray(data.detail)) {
+            detailText = data.detail.map((d: any) => d.msg || JSON.stringify(d)).join('; ')
+          } else if (typeof data.detail === 'string') {
+            detailText = data.detail
+          } else if (data.message) {
+            detailText = data.message
+          } else {
+            detailText = JSON.stringify(data)
+          }
+          ;(error as any).displayMessage = `${error.message}: ${detailText}`
         }
         return Promise.reject(error)
       }

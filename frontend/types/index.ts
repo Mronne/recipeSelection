@@ -59,8 +59,8 @@ export interface MealieRecipe {
   recipeYield: string
   recipeIngredient: MealieIngredient[]
   recipeInstructions: MealieInstruction[]
-  tags: MealieTag[]
-  recipeCategory: MealieCategory[]
+  tags: MealieTag[] | string[]
+  recipeCategory: MealieCategory[] | string[]
   totalTime: string | null
   prepTime: string | null
   performTime: string | null

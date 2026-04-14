@@ -122,8 +122,8 @@ export function useCreateRecipe() {
         result = await api.createRecipe(data)
       }
       return { success: true, recipe: result }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : '创建失败'
+    } catch (err: any) {
+      const message = err?.displayMessage || err?.message || '创建失败'
       setError(message)
       return { success: false, error: message }
     } finally {

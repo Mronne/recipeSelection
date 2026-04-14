@@ -45,7 +45,12 @@ class ApiClient {
     // 响应拦截器 - 错误处理
     this.client.interceptors.response.use(
       (response) => response,
-      (error: AxiosError) => {
+      (error: AxiosError<{ detail?: string; message?: string }>) => {
+        if (error.response?.data) {
+          const data = error.response.data
+          const detail = data.detail || data.message || JSON.stringify(data)
+          ;(error as any).displayMessage = `${error.message}: ${detail}`
+        }
         return Promise.reject(error)
       }
     )

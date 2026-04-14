@@ -186,8 +186,10 @@ export function fromBackendRecipe(backend: MealieRecipe): Recipe {
       description: inst.text,
       image: undefined,
     })),
-    tags: (backend.tags || []).map(t => fromBackendCategory(t.name)),
-    category: (backend.recipeCategory?.[0]?.name) || '中餐',
+    tags: (backend.tags || []).map(t => typeof t === 'string' ? t : fromBackendCategory(t.name)),
+    category: (typeof backend.recipeCategory?.[0] === 'string'
+      ? backend.recipeCategory[0]
+      : backend.recipeCategory?.[0]?.name) || '中餐',
     createdAt: backend.dateAdded,
     updatedAt: backend.dateUpdated,
   }
@@ -206,11 +208,11 @@ export function toBackendRecipe(frontend: RecipeCreate): Partial<MealieRecipe> {
     recipeIngredient: frontend.ingredients.map(toBackendIngredientItem),
     recipeInstructions: frontend.steps.map((step) => ({
       text: step.description,
-      title: null,
+      title: '',
       ingredient_references: [],
     })),
-    tags: frontend.tags.map(name => ({ name, slug: '' })),
-    recipeCategory: frontend.category ? [{ name: frontend.category, slug: '' }] : [],
+    tags: frontend.tags,
+    recipeCategory: frontend.category ? [frontend.category] : [],
   }
 }
 

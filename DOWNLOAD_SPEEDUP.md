@@ -71,12 +71,12 @@ aria2c -x 16 -s 16 "你的下载链接"
    # 登录
    echo "ghp_你的Token" | docker login ghcr.io -u Mronne --password-stdin
    # 拉取镜像
-   docker pull --platform linux/arm64 ghcr.io/mronne/recipeselection:main
-   docker pull --platform linux/arm64 ghcr.io/mronne/recipeselection-frontend:main
+   docker pull --platform linux/arm64 ghcr.io/mronne/yus-kitchen:main
+   docker pull --platform linux/arm64 ghcr.io/mronne/yus-kitchen-frontend:main
    
    # 保存为文件
-   docker save ghcr.io/mronne/recipeselection:main > mealie-backend.tar
-   docker save ghcr.io/mronne/recipeselection-frontend:main > mealie-frontend.tar
+   docker save ghcr.io/mronne/yus-kitchen:main > mealie-backend.tar
+   docker save ghcr.io/mronne/yus-kitchen-frontend:main > mealie-frontend.tar
    
    # 压缩
    gzip mealie-backend.tar
@@ -107,16 +107,16 @@ docker login ghcr.io -u Mronne --password %TOKEN%
 
 echo.
 echo [2/4] 下载后端镜像 (ARM64)...
-docker pull --platform linux/arm64 ghcr.io/mronne/recipeselection:main
+docker pull --platform linux/arm64 ghcr.io/mronne/yus-kitchen:main
 
 echo.
 echo [3/4] 下载前端镜像 (ARM64)...
-docker pull --platform linux/arm64 ghcr.io/mronne/recipeselection-frontend:main
+docker pull --platform linux/arm64 ghcr.io/mronne/yus-kitchen-frontend:main
 
 echo.
 echo [4/4] 保存镜像文件...
-docker save ghcr.io/mronne/recipeselection:main -o mealie-backend.tar
-docker save ghcr.io/mronne/recipeselection-frontend:main -o mealie-frontend.tar
+docker save ghcr.io/mronne/yus-kitchen:main -o mealie-backend.tar
+docker save ghcr.io/mronne/yus-kitchen-frontend:main -o mealie-frontend.tar
 
 echo.
 echo === 下载完成 ===

@@ -50,12 +50,12 @@ docker login -u mronne --password-stdin
 
 ```bash
 # 给镜像打标签（替换为你的用户名）
-docker tag ghcr.io/mronne/recipeselection:main mronne/wangzhe-restaurant:latest
-docker tag ghcr.io/mronne/recipeselection-frontend:main mronne/wangzhe-restaurant-frontend:latest
+docker tag ghcr.io/mronne/recipeselection:main mronne/yus-kitchen:latest
+docker tag ghcr.io/mronne/recipeselection-frontend:main mronne/yus-kitchen-frontend:latest
 
 # 推送
-docker push mronne/wangzhe-restaurant:latest
-docker push mronne/wangzhe-restaurant-frontend:latest
+docker push mronne/yus-kitchen:latest
+docker push mronne/yus-kitchen-frontend:latest
 ```
 
 ---
@@ -123,8 +123,8 @@ jobs:
         platforms: linux/arm64
         push: true
         tags: |
-          ${{ secrets.DOCKERHUB_USERNAME }}/wangzhe-restaurant:latest
-          ${{ secrets.DOCKERHUB_USERNAME }}/wangzhe-restaurant:${{ github.sha }}
+          ${{ secrets.DOCKERHUB_USERNAME }}/yus-kitchen:latest
+          ${{ secrets.DOCKERHUB_USERNAME }}/yus-kitchen:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -135,8 +135,8 @@ jobs:
         platforms: linux/arm64
         push: true
         tags: |
-          ${{ secrets.DOCKERHUB_USERNAME }}/wangzhe-restaurant-frontend:latest
-          ${{ secrets.DOCKERHUB_USERNAME }}/wangzhe-restaurant-frontend:${{ github.sha }}
+          ${{ secrets.DOCKERHUB_USERNAME }}/yus-kitchen-frontend:latest
+          ${{ secrets.DOCKERHUB_USERNAME }}/yus-kitchen-frontend:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 ```
@@ -159,7 +159,7 @@ jobs:
 docker info | grep Username
 
 # 确认镜像标签正确
-docker images | grep wangzhe
+docker images | grep yus-kitchen
 ```
 
 ### Q3: GitHub Actions 推送失败
@@ -180,8 +180,8 @@ version: "3.8"
 
 services:
   mealie:
-    container_name: wangzhe-restaurant-api
-    image: mronne/wangzhe-restaurant:latest  # Docker Hub 镜像
+    container_name: yus-kitchen-api
+    image: mronne/yus-kitchen:latest  # Docker Hub 镜像
     restart: always
     ports:
       - "9000:9000"
@@ -193,8 +193,8 @@ services:
       - TZ=Asia/Shanghai
 
   frontend:
-    container_name: wangzhe-restaurant-web
-    image: mronne/wangzhe-restaurant-frontend:latest  # Docker Hub 镜像
+    container_name: yus-kitchen-web
+    image: mronne/yus-kitchen-frontend:latest  # Docker Hub 镜像
     restart: always
     ports:
       - "3000:3000"

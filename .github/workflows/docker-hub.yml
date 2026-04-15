@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: mronne/wangzhe-restaurant
+  IMAGE_NAME: mronne/yus-kitchen
 
 jobs:
   build-and-push:
@@ -86,8 +86,8 @@ jobs:
         
         services:
           mealie:
-            container_name: wangzhe-restaurant
-            image: mronne/wangzhe-restaurant:latest
+            container_name: yus-kitchen
+            image: mronne/yus-kitchen:latest
             restart: always
             ports:
               - "9000:9000"
@@ -102,11 +102,11 @@ jobs:
         EOF
         
         cat > deployment/README.txt << 'EOF'
-        王者餐厅 - 极空间 Z2 PRO 部署包 (Docker Hub 版本)
+        裕厨华餐 - 极空间 Z2 PRO 部署包 (Docker Hub 版本)
         ================================================
         
         镜像地址:
-          - 单镜像: docker.io/mronne/wangzhe-restaurant:latest
+          - 单镜像: docker.io/mronne/yus-kitchen:latest
           
         说明:
           这是一个后端+前端合一的单镜像，FastAPI 直接托管 Next.js 静态页面。

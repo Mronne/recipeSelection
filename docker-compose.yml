@@ -1,8 +1,8 @@
 services:
   # Mealie 后端服务
   mealie:
-    container_name: wangzhe-restaurant-api
-    image: ghcr.io/${GITHUB_USER:-mronne}/recipeselection:latest
+    container_name: yus-kitchen-api
+    image: mronne/yus-kitchen:latest
     build:
       context: .
       target: production
@@ -41,7 +41,7 @@ services:
       # 邮件配置（可选）
       # SMTP_HOST=
       # SMTP_PORT=587
-      # SMTP_FROM_NAME=王者餐厅
+      # SMTP_FROM_NAME=裕厨华餐
       # SMTP_AUTH_STRATEGY=TLS
       # SMTP_FROM_EMAIL=
       # SMTP_USER=
@@ -52,8 +52,8 @@ services:
   # Next.js 前端服务（可选，独立部署时使用）
   # 如果你希望前后端分离，取消下面的注释
   # frontend:
-  #   container_name: wangzhe-restaurant-web
-  #   image: ghcr.io/${GITHUB_USER:-mronne}/recipeselection-frontend:latest
+  #   container_name: yus-kitchen-web
+  #   image: mronne/yus-kitchen-frontend:latest
   #   build:
   #     context: ./frontend
   #     dockerfile: Dockerfile

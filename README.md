@@ -1,10 +1,10 @@
-# 王者餐厅 (Wangzhe Restaurant)
+# 裕厨华餐 (Yus Kitchen and Huas Table)
 
 基于 [Mealie](https://github.com/mealie-recipes/mealie) 的定制版本，使用 Next.js + React 19 重构了前端界面。
 
 ## 🏗️ 与原版 Mealie 的区别
 
-| 特性 | 原版 Mealie | 王者餐厅 |
+| 特性 | 原版 Mealie | 裕厨华餐 |
 |------|-------------|----------|
 | 前端框架 | Nuxt.js 3 | Next.js 15 + React 19 |
 | UI 风格 | Vuetify | Tailwind CSS |
@@ -17,8 +17,8 @@
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/yourusername/wangzhe-restaurant.git
-cd wangzhe-restaurant
+git clone https://github.com/yourusername/yus-kitchen.git
+cd yus-kitchen
 
 # 2. 配置环境变量
 cp .env.example .env
@@ -83,12 +83,12 @@ npm run dev
 
 ```bash
 # 本地构建
-docker build -f docker/Dockerfile -t wangzhe-restaurant:latest .
+docker build -f docker/Dockerfile -t yus-kitchen:latest .
 
 # 多架构构建（需要 buildx）
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  -t wangzhe-restaurant:latest \
+  -t yus-kitchen:latest \
   -f docker/Dockerfile \
   .
 ```
@@ -121,7 +121,7 @@ docker buildx build \
 
 ```yaml
 # 前端定制配置
-FRONTEND_TITLE: "王者餐厅"      # 页面标题
+FRONTEND_TITLE: "裕厨华餐"      # 页面标题
 FRONTEND_LOGO: ""              # 自定义 Logo URL
 ```
 

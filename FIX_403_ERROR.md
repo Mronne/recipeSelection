@@ -2,7 +2,7 @@
 
 错误信息：
 ```
-403 Forbidden: failed to resolve reference "ghcr.io/mronne/recipeselection:main"
+403 Forbidden: failed to resolve reference "ghcr.io/mronne/yus-kitchen:main"
 ```
 
 这意味着你的 Token 认证成功了，但没有权限访问私有镜像。
@@ -41,7 +41,7 @@ GitHub Container Registry (ghcr.io) 的权限与仓库权限是分开的。
    echo "ghp_你的新Token" | docker login ghcr.io -u Mronne --password-stdin
    
    # 拉取镜像
-   docker pull --platform linux/arm64 ghcr.io/mronne/recipeselection:main
+   docker pull --platform linux/arm64 ghcr.io/mronne/yus-kitchen:main
    ```
 
 ---
@@ -52,7 +52,7 @@ GitHub Container Registry (ghcr.io) 的权限与仓库权限是分开的。
 
 1. 进入 GitHub 仓库页面
 2. 点击右侧 **Packages** 标签
-3. 点击镜像名称（如 `recipeselection`）
+3. 点击镜像名称（如 `yus-kitchen`）
 4. 点击右侧 **Package settings**
 5. 在 **Manage Actions access** 或 **Inherited access** 中确保：
    - ✅ 你的账号有 **Read** 权限
@@ -75,7 +75,7 @@ gh auth login
 gh auth token | docker login ghcr.io -u Mronne --password-stdin
 
 # 下载镜像
-docker pull --platform linux/arm64 ghcr.io/mronne/recipeselection:main
+docker pull --platform linux/arm64 ghcr.io/mronne/yus-kitchen:main
 ```
 
 ---
@@ -107,7 +107,7 @@ echo "ghp_你的新Token" | docker login ghcr.io -u Mronne --password-stdin
 # 应该显示：Login Succeeded
 
 # 3. 检查权限
-docker pull --platform linux/arm64 ghcr.io/mronne/recipeselection:main
+docker pull --platform linux/arm64 ghcr.io/mronne/yus-kitchen:main
 ```
 
 ---

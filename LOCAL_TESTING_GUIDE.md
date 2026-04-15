@@ -5,7 +5,7 @@
 后端数据存储在以下位置：
 
 ```
-/home/mronne/Projects/recipeSelection/dev/data/
+/home/mronne/Projects/yus-kitchen/dev/data/
 ├── mealie.db              # SQLite 数据库（食谱、用户等数据）
 ├── recipes/               # 食谱相关文件
 │   └── {uuid}/           # 每个食谱一个目录
@@ -23,7 +23,7 @@
 **1. 查看数据库（SQLite）**
 ```bash
 # 进入项目目录
-cd /home/mronne/Projects/recipeSelection
+cd /home/mronne/Projects/yus-kitchen
 
 # 使用 sqlite3 命令行查看
 sqlite3 dev/data/mealie.db
@@ -104,7 +104,7 @@ async rewrites() {
 
 ### 1. 启动后端
 ```bash
-cd /home/mronne/Projects/recipeSelection
+cd /home/mronne/Projects/yus-kitchen
 source .venv/bin/activate
 export PRODUCTION=false
 export ALLOW_SIGNUP=true
@@ -114,7 +114,7 @@ python mealie/main.py
 
 ### 2. 启动前端（新终端）
 ```bash
-cd /home/mronne/Projects/recipeSelection/frontend
+cd /home/mronne/Projects/yus-kitchen/frontend
 npm run dev
 ```
 

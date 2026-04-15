@@ -32,7 +32,7 @@ if errorlevel 1 (
 )
 
 echo [步骤 2/4] 下载后端镜像...
-docker pull ghcr.io/mronne/recipeselection:main
+docker pull ghcr.io/mronne/yus-kitchen:main
 if errorlevel 1 (
     echo [错误] 后端镜像下载失败
     pause
@@ -40,7 +40,7 @@ if errorlevel 1 (
 )
 
 echo [步骤 3/4] 下载前端镜像...
-docker pull ghcr.io/mronne/recipeselection-frontend:main
+docker pull ghcr.io/mronne/yus-kitchen-frontend:main
 if errorlevel 1 (
     echo [错误] 前端镜像下载失败
     pause
@@ -49,7 +49,7 @@ if errorlevel 1 (
 
 echo [步骤 4/4] 保存镜像为文件...
 echo 正在保存后端镜像 (可能需要几分钟)...
-docker save ghcr.io/mronne/recipeselection:main -o mealie-backend.tar
+docker save ghcr.io/mronne/yus-kitchen:main -o mealie-backend.tar
 if errorlevel 1 (
     echo [错误] 保存后端镜像失败
     pause
@@ -58,7 +58,7 @@ if errorlevel 1 (
 echo [OK] 后端镜像已保存: mealie-backend.tar
 
 echo 正在保存前端镜像...
-docker save ghcr.io/mronne/recipeselection-frontend:main -o mealie-frontend.tar
+docker save ghcr.io/mronne/yus-kitchen-frontend:main -o mealie-frontend.tar
 if errorlevel 1 (
     echo [错误] 保存前端镜像失败
     pause

@@ -16,10 +16,10 @@
 
 ```bash
 # 下载单镜像（后端 API + 前端 Web 合一）
-docker pull ghcr.io/mronne/recipeselection:main
+docker pull mronne/yus-kitchen:latest
 
 # 查看已下载的镜像
-docker images | grep recipeselection
+docker images | grep yus-kitchen
 ```
 
 ---
@@ -32,7 +32,7 @@ mkdir -p ~/Desktop/mealie-images
 cd ~/Desktop/mealie-images
 
 # 保存镜像（约 400-600MB）
-docker save ghcr.io/mronne/recipeselection:main > mealie.tar
+docker save mronne/yus-kitchen:latest > mealie.tar
 
 # 查看文件大小
 ls -lh *.tar
@@ -72,7 +72,7 @@ ls -lh *.tar
 ### 验证镜像已导入
 
 导入完成后，在 **镜像** 列表中应该能看到：
-- `ghcr.io/mronne/recipeselection:main`
+- `mronne/yus-kitchen:latest`
 
 ---
 
@@ -85,9 +85,9 @@ version: "3.8"
 
 services:
   mealie:
-    container_name: wangzhe-restaurant
+    container_name: yus-kitchen
     # 使用已导入的镜像
-    image: ghcr.io/mronne/recipeselection:main
+    image: mronne/yus-kitchen:latest
     restart: always
     ports:
       - "9000:9000"
@@ -128,10 +128,10 @@ ssh root@你的极空间IP
 docker load -i /tmp/mealie.tar
 
 # 验证
-docker images | grep recipeselection
+docker images | grep yus-kitchen
 
 # 启动（如果在对应目录）
-cd /你的存储池/Docker/wangzhe-restaurant/
+cd /你的存储池/Docker/yus-kitchen/
 docker-compose up -d
 ```
 

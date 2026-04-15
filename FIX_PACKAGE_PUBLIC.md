@@ -11,7 +11,7 @@
 1. 进入 GitHub 仓库页面
 2. 点击右侧 **Packages** 标签
    ![位置在 Code、Issues、Pull requests 旁边]
-3. 点击镜像名称（如 `recipeselection`）
+3. 点击镜像名称（如 `yus-kitchen`）
 4. 在镜像页面右侧点击 **Package settings**
 
 ### 步骤 2: 更改可见性
@@ -28,7 +28,7 @@
 
 ### 步骤 3: 对另一个镜像重复操作
 
-同样设置 `recipeselection-frontend` 为 Public。
+同样设置 `yus-kitchen-frontend` 为 Public。
 
 ---
 
@@ -55,8 +55,8 @@ docker logout ghcr.io
 docker system prune -f
 
 # 无需登录即可拉取（因为是 public 了）
-docker pull --platform linux/arm64 ghcr.io/mronne/recipeselection:main
-docker pull --platform linux/arm64 ghcr.io/mronne/recipeselection-frontend:main
+docker pull --platform linux/arm64 ghcr.io/mronne/yus-kitchen:main
+docker pull --platform linux/arm64 ghcr.io/mronne/yus-kitchen-frontend:main
 ```
 
 ---
@@ -89,7 +89,7 @@ GitHub 的权限同步有延迟，等待 5-10 分钟再试。
 
 在浏览器中访问：
 ```
-https://ghcr.io/v2/mronne/recipeselection/manifests/main
+https://ghcr.io/v2/mronne/yus-kitchen/manifests/main
 ```
 
 - 如果返回 JSON 数据 → 镜像已公开 ✅
@@ -105,8 +105,8 @@ https://ghcr.io/v2/mronne/recipeselection/manifests/main
 
 ```bash
 # 在电脑上打包项目
-git clone https://github.com/Mronne/recipeSelection.git
-cd recipeSelection
+git clone https://github.com/Mronne/yus-kitchen.git
+cd yus-kitchen
 tar czvf ../mealie-source.tar.gz --exclude='.git' --exclude='frontend/node_modules' .
 
 # 上传到极空间
@@ -120,7 +120,7 @@ ssh root@极空间IP
 
 cd /tmp
 tar xzvf mealie-source.tar.gz
-cd recipeSelection
+cd yus-kitchen
 
 # 构建后端
 docker build -f docker/Dockerfile --target production -t mealie-backend .

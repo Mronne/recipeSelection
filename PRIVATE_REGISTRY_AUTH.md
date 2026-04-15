@@ -27,12 +27,12 @@ $token = "ghp_你的Token"
 echo $token | docker login ghcr.io -u Mronne --password-stdin
 
 # 下载镜像
-docker pull ghcr.io/mronne/recipeselection:main
-docker pull ghcr.io/mronne/recipeselection-frontend:main
+docker pull ghcr.io/mronne/yus-kitchen:main
+docker pull ghcr.io/mronne/yus-kitchen-frontend:main
 
 # 保存镜像
-docker save ghcr.io/mronne/recipeselection:main > mealie-backend.tar
-docker save ghcr.io/mronne/recipeselection-frontend:main > mealie-frontend.tar
+docker save ghcr.io/mronne/yus-kitchen:main > mealie-backend.tar
+docker save ghcr.io/mronne/yus-kitchen-frontend:main > mealie-frontend.tar
 ```
 
 #### Mac/Linux:
@@ -41,12 +41,12 @@ docker save ghcr.io/mronne/recipeselection-frontend:main > mealie-frontend.tar
 echo "ghp_你的Token" | docker login ghcr.io -u Mronne --password-stdin
 
 # 下载镜像
-docker pull ghcr.io/mronne/recipeselection:main
-docker pull ghcr.io/mronne/recipeselection-frontend:main
+docker pull ghcr.io/mronne/yus-kitchen:main
+docker pull ghcr.io/mronne/yus-kitchen-frontend:main
 
 # 保存镜像
-docker save ghcr.io/mronne/recipeselection:main > mealie-backend.tar
-docker save ghcr.io/mronne/recipeselection-frontend:main > mealie-frontend.tar
+docker save ghcr.io/mronne/yus-kitchen:main > mealie-backend.tar
+docker save ghcr.io/mronne/yus-kitchen-frontend:main > mealie-frontend.tar
 ```
 
 ---
@@ -107,7 +107,7 @@ gh auth login
 gh auth token | docker login ghcr.io -u Mronne --password-stdin
 
 # 下载镜像
-docker pull ghcr.io/mronne/recipeselection:main
+docker pull ghcr.io/mronne/yus-kitchen:main
 ```
 
 ---

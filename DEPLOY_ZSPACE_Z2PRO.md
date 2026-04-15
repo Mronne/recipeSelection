@@ -25,8 +25,8 @@ version: "3.8"
 
 services:
   mealie:
-    container_name: wangzhe-restaurant
-    image: ghcr.io/mronne/recipeselection:main
+    container_name: yus-kitchen
+    image: mronne/yus-kitchen:latest
     restart: always
     ports:
       - "9000:9000"
@@ -47,7 +47,7 @@ services:
 ### 步骤 3: 上传到极空间
 
 1. 打开极空间客户端 → **文件管理**
-2. 创建一个文件夹，如：`/Docker/wangzhe-restaurant/`
+2. 创建一个文件夹，如：`/Docker/yus-kitchen/`
 3. 将 `docker-compose.yml` 上传到这个文件夹
 
 ### 步骤 4: 使用 Container Station 部署
@@ -57,7 +57,7 @@ services:
 1. 打开 **Container Station**
 2. 左侧菜单 → **Compose 项目**
 3. 点击 **创建 Compose 项目**
-4. 项目名称：`wangzhe-restaurant`
+4. 项目名称：`yus-kitchen`
 5. 选择 **使用 Docker Compose 文件创建**
 6. 文件路径：点击右侧文件夹图标，选择刚才上传的 `docker-compose.yml`
 7. 点击 **创建**
@@ -72,13 +72,13 @@ services:
    ```
 3. 进入目录并启动：
    ```bash
-   cd /你的存储池/Docker/wangzhe-restaurant/
+   cd /你的存储池/Docker/yus-kitchen/
    docker-compose up -d
    ```
 
 ### 步骤 5: 验证部署
 
-1. 在 Container Station → **容器** 中查看 `wangzhe-restaurant`
+1. 在 Container Station → **容器** 中查看 `yus-kitchen`
 2. 确认容器显示为 **运行中** (绿色)
 
 ### 步骤 6: 访问应用
@@ -93,7 +93,7 @@ services:
 
 1. 登录 Portainer
 2. **Stacks** → **Add stack**
-3. Name: `wangzhe-restaurant`
+3. Name: `yus-kitchen`
 4. 将上面的 docker-compose 内容粘贴到编辑器
 5. 点击 **Deploy the stack**
 
@@ -112,10 +112,10 @@ services:
 
 ```bash
 # 在电脑上下载镜像
-docker pull ghcr.io/mronne/recipeselection:main
+docker pull mronne/yus-kitchen:latest
 
 # 保存为文件
-docker save ghcr.io/mronne/recipeselection:main > mealie.tar
+docker save mronne/yus-kitchen:latest > mealie.tar
 
 # 上传到极空间，然后在 Container Station 中导入
 ```
@@ -127,7 +127,7 @@ docker save ghcr.io/mronne/recipeselection:main > mealie.tar
 
 或使用 SSH：
 ```bash
-cd /你的存储池/Docker/wangzhe-restaurant/
+cd /你的存储池/Docker/yus-kitchen/
 docker-compose pull
 docker-compose up -d
 ```

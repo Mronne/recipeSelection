@@ -8,8 +8,8 @@ version: "3.8"
 services:
   # 后端 API + 前端 Web 合一服务
   mealie:
-    container_name: wangzhe-restaurant
-    image: ghcr.io/mronne/recipeselection:main
+    container_name: yus-kitchen
+    image: mronne/yus-kitchen:latest
     restart: always
     ports:
       - "9000:9000"

@@ -12,7 +12,7 @@ export default function Logo({ width = 200, height = 60, className = '' }: LogoP
   return (
     <Image
       src="/logo.png"
-      alt="王者餐厅"
+      alt="裕厨华餐"
       width={width}
       height={height}
       className={`object-contain w-auto h-auto ${className}`}

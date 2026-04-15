@@ -45,7 +45,7 @@ echo [OK] 登录成功
 echo.
 echo [步骤 2/5] 下载后端镜像 (ARM64)...
 echo 这可能需要几分钟，请耐心等待...
-docker pull --platform linux/arm64 ghcr.io/mronne/recipeselection:main
+docker pull --platform linux/arm64 ghcr.io/mronne/yus-kitchen:main
 if errorlevel 1 (
     echo [错误] 后端镜像下载失败
     pause
@@ -56,7 +56,7 @@ echo [OK] 后端镜像下载完成
 echo.
 echo [步骤 3/5] 下载前端镜像 (ARM64)...
 echo 这可能需要几分钟，请耐心等待...
-docker pull --platform linux/arm64 ghcr.io/mronne/recipeselection-frontend:main
+docker pull --platform linux/arm64 ghcr.io/mronne/yus-kitchen-frontend:main
 if errorlevel 1 (
     echo [错误] 前端镜像下载失败
     pause
@@ -66,7 +66,7 @@ echo [OK] 前端镜像下载完成
 
 echo.
 echo [步骤 4/5] 保存镜像为文件...
-docker save ghcr.io/mronne/recipeselection:main -o mealie-backend.tar
+docker save ghcr.io/mronne/yus-kitchen:main -o mealie-backend.tar
 if errorlevel 1 (
     echo [错误] 保存后端镜像失败
     pause
@@ -74,7 +74,7 @@ if errorlevel 1 (
 )
 echo [OK] 后端镜像已保存: mealie-backend.tar
 
-docker save ghcr.io/mronne/recipeselection-frontend:main -o mealie-frontend.tar
+docker save ghcr.io/mronne/yus-kitchen-frontend:main -o mealie-frontend.tar
 if errorlevel 1 (
     echo [错误] 保存前端镜像失败
     pause

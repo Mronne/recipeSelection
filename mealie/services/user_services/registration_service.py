@@ -103,9 +103,15 @@ class RegistrationService:
                 raise HTTPException(status.HTTP_400_BAD_REQUEST, {"message": "Invalid group token"})
             household = maybe_none_household
         elif registration.group:
-            new_group = True
-            group = self._register_new_group()
-            household = self._fetch_or_register_new_household(group.id)
+            # 查找是否已有同名 group，有则加入，无则创建
+            existing_group = self.repos.groups.get_by_name(registration.group)
+            if existing_group:
+                group = existing_group
+                household = self._fetch_or_register_new_household(group.id)
+            else:
+                new_group = True
+                group = self._register_new_group()
+                household = self._fetch_or_register_new_household(group.id)
         else:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, {"message": "Missing group"})
 

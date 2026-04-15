@@ -193,15 +193,11 @@ class ApiClient {
     const formData = new FormData()
     formData.append('image', file)
     formData.append('extension', file.name.split('.').pop() || 'jpg')
-    
+
+    // 注意：不要手动设置 Content-Type，让浏览器自动添加 boundary
     const response = await this.client.put<{ image: string }>(
       `/recipes/${recipeSlug}/image`,
       formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
     )
     return response.data.image
   }

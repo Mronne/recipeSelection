@@ -83,36 +83,28 @@ export default function CreateRecipe() {
 
   const handleSubmit = async () => {
     setError('')
-    console.log('handleSubmit: 开始创建菜谱', recipe)
-    console.log('handleSubmit: 图片文件', imageFile)
-    
-    // 调试：打印实际发送到后端的数据
-    const { toBackendRecipe } = await import('@/lib/adapters')
-    console.log('handleSubmit: 后端数据', toBackendRecipe(recipe))
     
     const result = await create(recipe)
-    console.log('handleSubmit: 创建结果', result)
     
     if (result.success && result.recipe) {
-      console.log('handleSubmit: 菜谱创建成功', result.recipe.slug)
+      const recipeSlug = result.recipe.slug
       
       // 如果有图片文件，上传图片
-      if (imageFile && result.recipe.slug) {
-        console.log('handleSubmit: 开始上传图片')
+      if (imageFile && recipeSlug) {
         try {
-          const uploadResult = await api.uploadRecipeImage(result.recipe.slug, imageFile)
-          console.log('handleSubmit: 图片上传成功', uploadResult)
-        } catch (err) {
-          console.error('handleSubmit: 图片上传失败', err)
-          // 图片上传失败不影响菜谱创建成功
+          const uploadResult = await api.uploadRecipeImage(recipeSlug, imageFile)
+          console.log('图片上传成功', uploadResult)
+        } catch (err: any) {
+          console.error('图片上传失败', err)
+          setError(`菜谱已创建，但图片上传失败：${err?.displayMessage || err?.message || '未知错误'}`)
+          // 不立即跳转，让用户看到错误
+          return
         }
-      } else {
-        console.log('handleSubmit: 没有图片需要上传', { imageFile: !!imageFile, slug: result.recipe.slug })
       }
+      
       setShowSuccess(true)
       setTimeout(() => router.push('/'), 1500)
     } else {
-      console.error('handleSubmit: 创建失败', result.error)
       setError(result.error || '创建失败，请重试')
     }
   }

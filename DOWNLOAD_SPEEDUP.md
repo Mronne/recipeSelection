@@ -70,7 +70,6 @@ aria2c -x 16 -s 16 "你的下载链接"
    ```bash
    # 登录
    echo "ghp_你的Token" | docker login ghcr.io -u Mronne --password-stdin
-   
    # 拉取镜像
    docker pull --platform linux/arm64 ghcr.io/mronne/recipeselection:main
    docker pull --platform linux/arm64 ghcr.io/mronne/recipeselection-frontend:main

@@ -21,6 +21,8 @@ export default function EditRecipeClient({ recipeId }: { recipeId: string }) {
   
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+
   const [recipe, setRecipe] = useState<Partial<RecipeCreate>>({
     name: '',
     description: '',
@@ -68,10 +70,23 @@ export default function EditRecipeClient({ recipeId }: { recipeId: string }) {
       alert('请输入菜谱名称')
       return
     }
-    
+
     setIsSaving(true)
     try {
       await api.updateRecipe(recipeId, recipe as RecipeCreate)
+
+      // 如果有新图片，上传图片
+      if (imageFile) {
+        try {
+          await api.uploadRecipeImage(recipeId, imageFile)
+        } catch (err: any) {
+          console.error('图片上传失败', err)
+          alert(`菜谱已保存，但图片上传失败：${err?.displayMessage || err?.message || '未知错误'}`)
+          setIsSaving(false)
+          return
+        }
+      }
+
       alert('保存成功！')
       router.push(`/recipe/detail?id=${recipeId}`)
     } catch (err) {
@@ -122,9 +137,12 @@ export default function EditRecipeClient({ recipeId }: { recipeId: string }) {
         <div className="p-4 sm:p-8 max-w-2xl mx-auto space-y-6">
           {/* Image */}
           <div className="max-w-xs mx-auto">
-            <ImageUploader 
+            <ImageUploader
               value={recipe.coverImage || ''}
-              onChange={(url) => updateRecipe({ coverImage: url })}
+              onChange={(url, file) => {
+                updateRecipe({ coverImage: url })
+                setImageFile(file || null)
+              }}
             />
           </div>
 

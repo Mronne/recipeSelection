@@ -194,10 +194,15 @@ class ApiClient {
     formData.append('image', file)
     formData.append('extension', file.name.split('.').pop() || 'jpg')
 
-    // 注意：不要手动设置 Content-Type，让浏览器自动添加 boundary
+    // 必须显式删除默认的 Content-Type，让浏览器自动添加 multipart boundary
     const response = await this.client.put<{ image: string }>(
       `/recipes/${recipeSlug}/image`,
       formData,
+      {
+        headers: {
+          'Content-Type': undefined,
+        },
+      },
     )
     return response.data.image
   }
@@ -283,10 +288,11 @@ class ApiClient {
   async uploadUserAvatar(userId: string, file: File): Promise<void> {
     const formData = new FormData()
     formData.append('profile', file)
-    
+
+    // 必须显式删除默认的 Content-Type，让浏览器自动添加 multipart boundary
     await this.client.post(`/users/${userId}/image`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        'Content-Type': undefined,
       },
     })
   }

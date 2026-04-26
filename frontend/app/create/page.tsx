@@ -489,38 +489,64 @@ function Step2Ingredients({
   }
 
   // 智能解析食谱文本
-  const handleParseRecipe = () => {
+  const handleParseRecipe = async () => {
     if (!parseText.trim()) return
-    
-    const parsed = parseRecipeText(parseText)
-    
-    // 添加解析出的食材
-    if (parsed.ingredients && parsed.ingredients.length > 0) {
-      const newIngredients = parsed.ingredients.map(ing => ({
-        name: ing.name,
-        amount: ing.amount,
-        unit: ing.unit,
-        category: 'other' as const,
-      }))
-      updateRecipe({
-        ingredients: [...recipe.ingredients, ...newIngredients]
-      })
+
+    try {
+      const parsed = await parseRecipeText(parseText)
+
+      // 添加解析出的食材
+      if (parsed.ingredients && parsed.ingredients.length > 0) {
+        const newIngredients = parsed.ingredients.map(ing => ({
+          name: ing.name,
+          amount: ing.amount,
+          unit: ing.unit,
+          category: 'other' as const,
+        }))
+        updateRecipe({
+          ingredients: [...recipe.ingredients, ...newIngredients]
+        })
+      }
+
+      // 添加解析出的步骤
+      if (parsed.steps && parsed.steps.length > 0) {
+        const newSteps = parsed.steps.map(step => ({
+          order: step.order,
+          description: step.description,
+        }))
+        updateRecipe({
+          steps: [...recipe.steps, ...newSteps]
+        })
+      }
+
+      // 如果解析出了菜名，更新菜名
+      if (parsed.name) {
+        updateRecipe({ name: parsed.name })
+      }
+
+      // 如果解析出了描述，更新描述
+      if (parsed.description) {
+        updateRecipe({ description: parsed.description })
+      }
+
+      // 如果解析出了时间和份量，更新
+      if (parsed.prepTime !== undefined) {
+        updateRecipe({ prepTime: parsed.prepTime })
+      }
+      if (parsed.cookTime !== undefined) {
+        updateRecipe({ cookTime: parsed.cookTime })
+      }
+      if (parsed.servings !== undefined) {
+        updateRecipe({ servings: parsed.servings })
+      }
+
+      setParseText('')
+      setShowParser(false)
+      alert(`成功解析！已添加 ${parsed.ingredients?.length || 0} 个食材，${parsed.steps?.length || 0} 个步骤`)
+    } catch (err) {
+      alert('解析失败，请检查网络连接或稍后重试')
+      console.error('Parse recipe failed:', err)
     }
-    
-    // 添加解析出的步骤
-    if (parsed.steps && parsed.steps.length > 0) {
-      const newSteps = parsed.steps.map(step => ({
-        order: step.order,
-        description: step.description,
-      }))
-      updateRecipe({
-        steps: [...recipe.steps, ...newSteps]
-      })
-    }
-    
-    setParseText('')
-    setShowParser(false)
-    alert(`成功解析！已添加 ${parsed.ingredients?.length || 0} 个食材，${parsed.steps?.length || 0} 个步骤`)
   }
 
   return (

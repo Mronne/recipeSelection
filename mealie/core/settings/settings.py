@@ -141,7 +141,7 @@ class AppSettings(AppLoggingSettings):
 
     GIT_COMMIT_HASH: str = "unknown"
 
-    ALLOW_SIGNUP: bool = False
+    ALLOW_SIGNUP: bool = True
     ALLOW_PASSWORD_LOGIN: bool = True
 
     DAILY_SCHEDULE_TIME: str = "23:45"
@@ -385,14 +385,21 @@ class AppSettings(AppLoggingSettings):
         return self.OIDC_FEATURE.enabled
 
     # ===============================================
-    # OpenAI Configuration
+    # LLM / OpenAI Configuration
+    #
+    # Supports OpenAI-compatible APIs, including国产模型:
+    # - Kimi (Moonshot):  base_url=https://api.moonshot.cn/v1  model=moonshot-v1-8k
+    # - DeepSeek:         base_url=https://api.deepseek.com     model=deepseek-chat
+    # - SiliconFlow:      base_url=https://api.siliconflow.cn/v1 model=deepseek-ai/DeepSeek-V3
+    # - 本地 Ollama:       base_url=http://localhost:11434/v1    model=llama3
+    # Set OPENAI_API_KEY and OPENAI_BASE_URL accordingly.
 
     OPENAI_BASE_URL: str | None = None
-    """The base URL for the OpenAI API. Leave this unset for most usecases"""
+    """The base URL for the OpenAI-compatible API. Set this for国产模型如 Kimi/DeepSeek"""
     OPENAI_API_KEY: MaskedNoneString = None
-    """Your OpenAI API key. Required to enable OpenAI features"""
+    """Your API key. Required to enable LLM features (OpenAI, Kimi, DeepSeek, etc.)"""
     OPENAI_MODEL: str = "gpt-4o"
-    """Which OpenAI model to send requests to. Leave this unset for most usecases"""
+    """Which model to use. Examples: gpt-4o, moonshot-v1-8k, deepseek-chat"""
     OPENAI_AUDIO_MODEL: str = "whisper-1"
     """Which OpenAI model to use for audio transcription. Leave this unset for most usecases"""
     OPENAI_CUSTOM_HEADERS: dict[str, str] = {}

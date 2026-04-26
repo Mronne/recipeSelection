@@ -253,6 +253,42 @@ class OpenAIService(BaseService):
         except Exception as e:
             raise Exception(f"OpenAI Request Failed. {e.__class__.__name__}: {e}") from e
 
+    async def parse_recipe_text(self, text: str) -> dict:
+        """Parse raw recipe text into structured data using LLM.
+
+        Uses chat.completions.create with json_object response format for
+        maximum compatibility with国产模型 (Kimi, DeepSeek, etc.).
+        """
+        prompt = self.get_prompt("recipes.parse-recipe-text")
+        client = self.get_client()
+
+        try:
+            response = await client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": prompt},
+                    {"role": "user", "content": text},
+                ],
+                response_format={"type": "json_object"},
+            )
+        except Exception:
+            # Fallback: some国产模型 may not support json_object mode
+            self.logger.warning("LLM json_object mode failed, falling back to plain text mode")
+            response = await client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": prompt + "\n\nIMPORTANT: Your response must be a valid JSON object and nothing else."},
+                    {"role": "user", "content": text},
+                ],
+            )
+
+        content = response.choices[0].message.content
+        if not content:
+            raise ValueError("LLM returned empty response")
+
+        import json
+        return json.loads(content)
+
     async def transcribe_audio(self, audio_file_path: Path) -> str | None:
         client = self.get_client()
 

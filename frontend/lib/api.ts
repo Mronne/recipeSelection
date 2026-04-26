@@ -186,6 +186,28 @@ class ApiClient {
     return fromBackendRecipe(response.data)
   }
 
+  // ==================== 智能解析 API ====================
+
+  async parseRecipeText(text: string): Promise<{
+    name: string
+    description: string
+    prep_time: number
+    cook_time: number
+    servings: number
+    ingredients: { name: string; amount: number; unit: string }[]
+    steps: { order: number; description: string }[]
+  }> {
+    const formData = new FormData()
+    formData.append('text', text)
+
+    const response = await this.client.post('/recipes/parse-text', formData, {
+      headers: {
+        'Content-Type': undefined,
+      },
+    })
+    return response.data
+  }
+
   // ==================== 图片上传 API ====================
 
   async uploadRecipeImage(recipeSlug: string, file: File): Promise<string> {
@@ -323,6 +345,7 @@ export const createRecipe = (data: RecipeCreate) => api.createRecipe(data)
 export const updateRecipe = (id: string, data: Partial<RecipeCreate>) => api.updateRecipe(id, data)
 export const deleteRecipe = (id: string) => api.deleteRecipe(id)
 export const uploadRecipeImage = (recipeId: string, file: File) => api.uploadRecipeImage(recipeId, file)
+export const parseRecipeText = (text: string) => api.parseRecipeText(text)
 export const getFoods = (search?: string) => api.getFoods(search)
 export const createFood = (name: string) => api.createFood(name)
 export const getUnits = () => api.getUnits()

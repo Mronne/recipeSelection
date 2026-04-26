@@ -21,7 +21,7 @@ class RegistrationController(BasePublicController):
     def register_new_user(self, data: CreateUserRegistration):
         settings = get_app_settings()
 
-        if not settings.ALLOW_SIGNUP and data.group_token is None or data.group_token == "":
+        if not settings.ALLOW_SIGNUP and (data.group_token is None or data.group_token == ""):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=ErrorResponse.respond("User Registration is Disabled"),

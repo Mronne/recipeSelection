@@ -24,6 +24,7 @@ from pydantic import UUID4
 from slugify import slugify
 
 from mealie.core import exceptions
+from mealie.core.config import get_app_settings
 from mealie.core.dependencies import (
     get_temporary_zip_path,
 )
@@ -41,6 +42,7 @@ from mealie.schema.recipe.recipe import (
     RecipeSummary,
 )
 from mealie.schema.recipe.recipe_asset import RecipeAsset
+from mealie.schema.openai.recipe_text import ParsedRecipeText
 from mealie.schema.recipe.recipe_scraper import ScrapeRecipeTest
 from mealie.schema.recipe.recipe_suggestion import RecipeSuggestionQuery, RecipeSuggestionResponse
 from mealie.schema.recipe.request_helpers import (
@@ -124,6 +126,29 @@ class RecipeController(BaseRecipeController):
 
     # =======================================================================
     # URL Scraping Operations
+
+    @router.post("/parse-text", response_model=ParsedRecipeText, tags=["Recipe: Operations"])
+    async def parse_recipe_text(self, text: str = Form(..., description="Raw recipe text to parse")):
+        """Parse raw recipe text into structured ingredients and steps using LLM."""
+        settings = get_app_settings()
+        if not settings.OPENAI_ENABLED:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=ErrorResponse.respond("LLM features are not enabled. Please configure OPENAI_API_KEY and OPENAI_MODEL."),
+            )
+
+        try:
+            from mealie.services.openai.openai import OpenAIService
+
+            service = OpenAIService()
+            result = await service.parse_recipe_text(text)
+            return ParsedRecipeText.model_validate(result)
+        except Exception as e:
+            self.logger.exception("Failed to parse recipe text with LLM")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=ErrorResponse.respond(f"LLM parsing failed: {e}"),
+            )
 
     @router.post("/test-scrape-url")
     async def test_parse_recipe_url(self, data: ScrapeRecipeTest):

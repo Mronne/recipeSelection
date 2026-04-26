@@ -1,4 +1,7 @@
 // 智能食谱解析器 - 从文本中自动提取食材和步骤
+// 优先使用后端 LLM 解析，fallback 到前端本地解析
+
+import { api } from './api'
 
 export interface ParsedIngredient {
   name: string
@@ -49,10 +52,35 @@ const SERVING_PATTERNS = [
 
 /**
  * 智能解析食谱文本
+ * 优先调用后端 LLM，失败时 fallback 到前端本地解析
  */
-export function parseRecipeText(text: string): Partial<ParsedRecipe> {
+export async function parseRecipeText(text: string): Promise<Partial<ParsedRecipe>> {
+  // 优先尝试后端 LLM 解析
+  try {
+    const llmResult = await api.parseRecipeText(text)
+    return {
+      name: llmResult.name || '',
+      description: llmResult.description || '',
+      prepTime: llmResult.prep_time ?? 15,
+      cookTime: llmResult.cook_time ?? 30,
+      servings: llmResult.servings ?? 2,
+      ingredients: llmResult.ingredients?.map(ing => ({
+        name: ing.name,
+        amount: ing.amount ?? 0,
+        unit: ing.unit || '适量',
+      })) || [],
+      steps: llmResult.steps?.map(step => ({
+        order: step.order,
+        description: step.description,
+      })) || [],
+    }
+  } catch (err) {
+    console.warn('LLM parse failed, falling back to local parser:', err)
+  }
+
+  // Fallback: 前端本地解析
   const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0)
-  
+
   const result: Partial<ParsedRecipe> = {
     name: '',
     description: '',
@@ -76,7 +104,7 @@ export function parseRecipeText(text: string): Partial<ParsedRecipe> {
   }
 
   // 如果没有明确分区，尝试智能识别
-  if ((!result.ingredients || result.ingredients.length === 0) && 
+  if ((!result.ingredients || result.ingredients.length === 0) &&
       (!result.steps || result.steps.length === 0)) {
     const { ingredients, steps } = smartParse(lines)
     result.ingredients = ingredients
@@ -91,7 +119,7 @@ export function parseRecipeText(text: string): Partial<ParsedRecipe> {
 
   // 提取菜名（第一行或包含"菜名"、"名称"的行）
   result.name = extractDishName(lines, text)
-  
+
   // 提取描述（第二行或简短描述）
   result.description = extractDescription(lines, result.name)
 
